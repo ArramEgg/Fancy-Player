@@ -1,0 +1,169 @@
+{
+	"geode": "5.0.0-beta.2",
+	"gd": {
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
+	},
+	"id": "arram.fancy-player",
+	"name": "Fancy Player",
+	"version": "v1.0.0",
+	"developer": "Arram",
+	"description": "Now you can be extra",
+	"tags": [
+		"customization",
+		"gameplay",
+		"offline"
+	],
+	"settings": {
+		"particles-title": {
+			"type": "title",
+			"name": "Configure Color of Player Particles"
+		},
+		"change-particles": {
+			"name": "Override Built-in Particle Colors",
+			"type": "bool",
+			"default": true
+		},
+		"sCR": {
+			"name": "startColorRed",
+			"type": "int",
+			"enable-if": "change-particles",
+			"default": 61,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"sCG": {
+			"name": "startColorGreen",
+			"type": "int",
+			"enable-if": "change-particles",
+			"default": 69,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"sCB": {
+			"name": "startColorBlue",
+			"type": "int",
+			"enable-if": "change-particles",
+			"default": 255,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"sCA": {
+			"name": "startColorAlpha",
+			"type": "int",
+			"enable-if": "change-particles",
+			"default": 255,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"fCR": {
+			"name": "finishColorRed",
+			"type": "int",
+			"enable-if": "change-particles",
+			"default": 115,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"fCG": {
+			"name": "finishColorGreen",
+			"type": "int",
+			"enable-if": "change-particles",
+			"default": 122,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"fCB": {
+			"name": "finishColorBlue",
+			"type": "int",
+			"enable-if": "change-particles",
+			"default": 255,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"fCA": {
+			"name": "finishColorAlpha",
+			"type": "int",
+			"enable-if": "change-particles",
+			"default": 255,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"dash-fire-title": {
+			"type": "title",
+			"name": "Configure Color of Dash Fire"
+		},
+		"change-dash-fire": {
+			"name": "Override Built-in Dash Fire Colors",
+			"type": "bool",
+			"default": true
+		},
+		"dCR": {
+			"name": "Red",
+			"type": "int",
+			"enable-if": "change-dash-fire",
+			"default": 0,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"dCG": {
+			"name": "Green",
+			"type": "int",
+			"enable-if": "change-dash-fire",
+			"default": 0,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"dCB": {
+			"name": "Blue",
+			"type": "int",
+			"enable-if": "change-dash-fire",
+			"default": 255,
+			"min": 0,
+			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"misc-title": {
+			"type": "title",
+			"name": "Miscellaneous Options"
+		},
+		"change-radius": {
+			"name": "Scale Radius Emitters (Type 1) Based on Player Size",
+			"type": "bool",
+			"default": false
+		}
+	}
+}
