@@ -34,8 +34,12 @@ enum PlayerMode {
     Spider,
     Swing
 };
-
+// obligatory comment
 class $modify(PlayerObject) {
+	// fight other mods to the death
+	static void onModify(auto& self) {
+		(void)self.setHookPriorityPost("PlayerObject::updateDashAnimation", Priority::Last);
+	}
 	// fields for comparing against changes
 	struct Fields {
 		bool lastUpsideDown = false;
@@ -73,6 +77,8 @@ class $modify(PlayerObject) {
 	void resetObject() {
 		PlayerObject::resetObject();
 		if (!fancy::settings.changeParticles) return;
+		// epic hack doubles as a mega hack reset fix + UFO reset bug fix
+		m_fields->lastMode = static_cast<PlayerMode>((getCurrentMode() + 1) % 7);
 		modifyPlayerParticles();
 	}
 	// call function from checkpoint
