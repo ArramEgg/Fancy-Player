@@ -8,9 +8,12 @@
 	},
 	"id": "arram.fancy-player",
 	"name": "Fancy Player",
-	"version": "v1.0.1",
+	"version": "v1.1.0",
 	"developer": "Arram",
 	"description": "Now you can be extra",
+	"links": {
+		"source": "https://github.com/ArramEgg/Fancy-Player"
+	},
 	"tags": [
 		"customization",
 		"gameplay",
@@ -25,6 +28,12 @@
 			"name": "Override Built-in Particle Colors",
 			"type": "bool",
 			"default": true
+		},
+		"rainbow-fade": {
+			"name": "Rainbow Fade (Overrides startColor/finishColor)",
+			"type": "bool",
+			"enable-if": "change-particles",
+			"default": false
 		},
 		"sCR": {
 			"name": "startColorRed",
@@ -123,6 +132,12 @@
 			"type": "bool",
 			"default": true
 		},
+		"rainbow-dash": {
+			"name": "Rainbow Dash Fire (Overrides RGB)",
+			"type": "bool",
+			"enable-if": "change-dash-fire",
+			"default": false
+		},
 		"dCR": {
 			"name": "Red",
 			"type": "int",
@@ -152,6 +167,20 @@
 			"default": 255,
 			"min": 0,
 			"max": 255,
+			"control": {
+				"slider": true
+			}
+		},
+		"rgb-title": {
+			"type": "title",
+			"name": "RGB Options"
+		},
+		"rgb-speed": {
+			"name": "RGB Fade Speed",
+			"type": "float",
+			"default": 0.2,
+			"min": 0.1,
+			"max": 1,
 			"control": {
 				"slider": true
 			}
