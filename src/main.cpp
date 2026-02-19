@@ -121,7 +121,7 @@ class $modify(PlayerObject) {
 			if (m_fields->hue > 1.f) m_fields->hue -= 1.f;
 		}
 
-		// particle logic
+		// change particles
 		if (fancy::settings.changeParticles) {
 			// color particles per frame if rainbow fade is on
 			if (fancy::settings.rainbowFade) {
@@ -175,27 +175,25 @@ class $modify(PlayerObject) {
 	// function to set particle colors
     void modifyParticles(CCParticleSystemQuad* p) {
         if (!p || m_isDart) return;
-		// normal color logic
+		// normal color
 		if (!fancy::settings.rainbowFade) {
         	p->setStartColor({fancy::settings.sCR, fancy::settings.sCG, fancy::settings.sCB, fancy::settings.sCA});
         	p->setEndColor({fancy::settings.fCR, fancy::settings.fCG, fancy::settings.fCB, fancy::settings.fCA});
 		}
-		// rainbow color logic
+		// rainbow color
 		else if (fancy::settings.rainbowFade) {
 			cocos2d::ccColor4F startColor = HSVtoRGB(m_fields->hue, 1.f, 1.f, fancy::settings.sCA);
 			cocos2d::ccColor4F endColor = HSVtoRGB(m_fields->hue, 1.f, 1.f, fancy::settings.fCA);
 			p->setStartColor(startColor);
 			p->setEndColor(endColor);
 		}
-		// radius scale logic
-		else {
-			if (!fancy::settings.changeRadius) return;
-			if (!m_fields->baseRadius.contains(p)) {
-				m_fields->baseRadius[p] = p->getStartRadius();
-			}
-			float base = m_fields->baseRadius[p];
-			p->setStartRadius(base * m_vehicleSize);
+		// radius scale
+		if (!fancy::settings.changeRadius) return;
+		if (!m_fields->baseRadius.contains(p)) {
+			m_fields->baseRadius[p] = p->getStartRadius();
 		}
+		float base = m_fields->baseRadius[p];
+		p->setStartRadius(base * m_vehicleSize);
     }
 
 	// function for coloring sprites
