@@ -1,4 +1,4 @@
-# 1.1.2
+# 1.1.3
 - Added another check to fix some bugs
 
 # 1.1.1
