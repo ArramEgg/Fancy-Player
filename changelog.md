@@ -1,8 +1,5 @@
-# 1.1.3
-- Added another check to fix some bugs
-
-# 1.1.1
-- Fix a mistake lol
+# 1.1.4
+- Fixed bugs and mistakes
 
 # 1.1.0
 - Added fading rainbow options for particles and dash fire

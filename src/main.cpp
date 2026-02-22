@@ -177,7 +177,7 @@ class $modify(PlayerObject) {
 
 	// function to set particle colors
     void modifyParticles(CCParticleSystemQuad* p) {
-        if (!p || m_isDart) return;
+        if (!p) return;
 		// normal color
 		if (!fancy::settings.rainbowFade) {
         	p->setStartColor({fancy::settings.sCR, fancy::settings.sCG, fancy::settings.sCB, fancy::settings.sCA});
