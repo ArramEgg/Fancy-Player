@@ -7,8 +7,8 @@ Serving suggestion: I match the dash fire and particle colors with my glow color
 ## Features
 
 * Override startColor and finishColor of player particles
-** Rainbow player particles
 * Override the color of the dashing fire
-** Rainbow dash fire
+* Rainbow player particles
+* Rainbow dash fire
 * Adjust RGB speed
 * Scale radius emitter maxRadius with player size
