@@ -1,3 +1,6 @@
+# 1.1.2
+- Added another check to fix some inconsistencies
+
 # 1.1.1
 - Fix a mistake lol
 

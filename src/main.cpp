@@ -54,6 +54,7 @@ class $modify(PlayerObject) {
 		std::unordered_map<CCParticleSystemQuad*, float> baseRadius;
 		float hue = 0.f;
 		float lastHue = 0.f;
+		bool lastGrounded = false;
 	};
 
 	// player init
@@ -85,6 +86,7 @@ class $modify(PlayerObject) {
 		m_fields->lastUpsideDown = m_isUpsideDown;
 		m_fields->lastMode = getCurrentMode();
 		m_fields->lastVehicleSize = m_vehicleSize;
+		m_fields->lastGrounded = m_isGrounded;
 		return true;
 	}
 
@@ -130,11 +132,12 @@ class $modify(PlayerObject) {
 			else {
 				// check for player changes
 				PlayerMode mode = getCurrentMode();
-				if (m_isUpsideDown != m_fields->lastUpsideDown || mode != m_fields->lastMode || m_vehicleSize != m_fields->lastVehicleSize) {
+				if (m_isUpsideDown != m_fields->lastUpsideDown || mode != m_fields->lastMode || m_vehicleSize != m_fields->lastVehicleSize || m_isGrounded != m_fields->lastGrounded) {
 					// update fields when changes occur
 					m_fields->lastUpsideDown = m_isUpsideDown;
 					m_fields->lastMode = mode;
 					m_fields->lastVehicleSize = m_vehicleSize;
+					m_fields->lastGrounded = m_isGrounded;
 					// color particles after changes
 					modifyPlayerParticles();
 				}
