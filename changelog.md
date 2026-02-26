@@ -1,3 +1,6 @@
+# 1.1.5
+- Added mod button to garage for easier access to mod settings
+
 # 1.1.4
 - Fixed bugs and mistakes
 

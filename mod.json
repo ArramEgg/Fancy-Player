@@ -1,5 +1,5 @@
 {
-	"geode": "5.0.0-beta.4",
+	"geode": "5.0.1",
 	"gd": {
 		"win": "2.2081",
 		"android": "2.2081",
@@ -8,7 +8,7 @@
 	},
 	"id": "arram.fancy-player",
 	"name": "Fancy Player",
-	"version": "v1.1.4",
+	"version": "v1.1.5",
 	"developer": "Arram",
 	"description": "Now you can be extra",
 	"links": {
@@ -195,5 +195,10 @@
 			"type": "bool",
 			"default": false
 		}
+	},
+	"resources": {
+		"sprites": [
+			"resources/*.png"
+		]
 	}
 }

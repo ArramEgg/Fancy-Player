@@ -1,6 +1,8 @@
 #include <Geode/Geode.hpp>
+#include <Geode/modify/GJGarageLayer.hpp>
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/binding/PlayerObject.hpp>
+#include <Geode/ui/GeodeUI.hpp>
 
 using namespace geode::prelude;
 
@@ -39,9 +41,34 @@ enum PlayerMode {
     Swing
 };
 
-// obligatory comment
+
+// obligatory comment #1
+class $modify(FPGarageLayer, GJGarageLayer) {
+	bool init() {
+		if (!GJGarageLayer::init()) return false;
+
+		// add settings button
+		auto menu = CCMenu::create();
+		menu->setPosition({512.f, 50.f});
+		auto spr = CCSprite::create("FP_logoBtn_001.png"_spr);
+		auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(FPGarageLayer::onLogoBtn));
+		btn->setAnchorPoint({0.5f, 0.5f});
+		menu->addChild(btn);
+		menu->updateLayout();
+		this->addChild(menu);
+		return true;
+	}
+
+	// i really don't need to add all these comments but i'm still going to... you're welcome
+	void onLogoBtn(CCObject *) {
+		openSettingsPopup(Mod::get());
+	}
+};
+
+
+// obligatory comment #2
 class $modify(PlayerObject) {
-	// fight other mods to the death
+	// set priority to last so mega hack doesn't override change
 	static void onModify(auto& self) {
 		(void)self.setHookPriorityPost("PlayerObject::updateDashAnimation", Priority::Last);
 	}
@@ -221,7 +248,7 @@ class $modify(PlayerObject) {
 		m_fields->lastHue = m_fields->hue;
 	}
 
-	// HSV mogs
+	// lol
 	cocos2d::ccColor4F HSVtoRGB(float h, float s, float v, float a) {
 		float r, g, b;
 		int i = static_cast<int>(h * 6);
