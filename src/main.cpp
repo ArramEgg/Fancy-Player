@@ -27,6 +27,7 @@ namespace fancy
 		int dCB = 0.f;
 		float rgbSpeed = 0.1f;
 		bool changeRadius = false;
+		bool addButton = false;
 	} settings;
 }
 
@@ -46,6 +47,11 @@ enum PlayerMode {
 class $modify(FPGarageLayer, GJGarageLayer) {
 	bool init() {
 		if (!GJGarageLayer::init()) return false;
+
+		// make button or nah?
+		typedef geode::prelude::Mod mod;
+		fancy::settings.addButton = mod::get()->getSettingValue<bool>("add-button");
+		if (!fancy::settings.addButton) return true;
 
 		// add settings button
 		auto menu = CCMenu::create();

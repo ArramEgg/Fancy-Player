@@ -194,6 +194,11 @@
 			"name": "Scale Radius Emitters (Type 1) Based on Player Size",
 			"type": "bool",
 			"default": false
+		},
+		"add-button": {
+			"name": "Add Settings Button to Garage (Quicker Settings Access)",
+			"type": "bool",
+			"default": false
 		}
 	},
 	"resources": {
