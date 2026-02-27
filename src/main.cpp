@@ -49,8 +49,7 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 		if (!GJGarageLayer::init()) return false;
 
 		// make button or nah?
-		typedef geode::prelude::Mod mod;
-		fancy::settings.addButton = mod::get()->getSettingValue<bool>("add-button");
+		fancy::settings.addButton = Mod::get()->getSettingValue<bool>("add-button");
 		if (!fancy::settings.addButton) return true;
 
 		// add settings button
@@ -95,24 +94,23 @@ class $modify(PlayerObject) {
 		if (!PlayerObject::init(player, ship, gameLayer, layer, playLayer)) return false;
 
 		// wall of settings
-		typedef geode::prelude::Mod mod;
-		fancy::settings.changeParticles = mod::get()->getSettingValue<bool>("change-particles");
-		fancy::settings.rainbowFade = mod::get()->getSettingValue<bool>("rainbow-fade");
-		fancy::settings.sCR = mod::get()->getSettingValue<int>("sCR") / 255.0f;
-		fancy::settings.sCG = mod::get()->getSettingValue<int>("sCG") / 255.0f;
-		fancy::settings.sCB = mod::get()->getSettingValue<int>("sCB") / 255.0f;
-		fancy::settings.sCA = mod::get()->getSettingValue<int>("sCA") / 255.0f;
-		fancy::settings.fCR = mod::get()->getSettingValue<int>("fCR") / 255.0f;
-		fancy::settings.fCG = mod::get()->getSettingValue<int>("fCG") / 255.0f;
-		fancy::settings.fCB = mod::get()->getSettingValue<int>("fCB") / 255.0f;
-		fancy::settings.fCA = mod::get()->getSettingValue<int>("fCA") / 255.0f;
-		fancy::settings.changeDashFire = mod::get()->getSettingValue<bool>("change-dash-fire");
-		fancy::settings.rainbowDash = mod::get()->getSettingValue<bool>("rainbow-dash");
-		fancy::settings.dCR = mod::get()->getSettingValue<int>("dCR");
-		fancy::settings.dCG = mod::get()->getSettingValue<int>("dCG");
-		fancy::settings.dCB = mod::get()->getSettingValue<int>("dCB");
-		fancy::settings.rgbSpeed = mod::get()->getSettingValue<float>("rgb-speed") * 0.1f;
-		fancy::settings.changeRadius = mod::get()->getSettingValue<bool>("change-radius");
+		fancy::settings.changeParticles = Mod::get()->getSettingValue<bool>("change-particles");
+		fancy::settings.rainbowFade = Mod::get()->getSettingValue<bool>("rainbow-fade");
+		fancy::settings.sCR = Mod::get()->getSettingValue<int>("sCR") / 255.0f;
+		fancy::settings.sCG = Mod::get()->getSettingValue<int>("sCG") / 255.0f;
+		fancy::settings.sCB = Mod::get()->getSettingValue<int>("sCB") / 255.0f;
+		fancy::settings.sCA = Mod::get()->getSettingValue<int>("sCA") / 255.0f;
+		fancy::settings.fCR = Mod::get()->getSettingValue<int>("fCR") / 255.0f;
+		fancy::settings.fCG = Mod::get()->getSettingValue<int>("fCG") / 255.0f;
+		fancy::settings.fCB = Mod::get()->getSettingValue<int>("fCB") / 255.0f;
+		fancy::settings.fCA = Mod::get()->getSettingValue<int>("fCA") / 255.0f;
+		fancy::settings.changeDashFire = Mod::get()->getSettingValue<bool>("change-dash-fire");
+		fancy::settings.rainbowDash = Mod::get()->getSettingValue<bool>("rainbow-dash");
+		fancy::settings.dCR = Mod::get()->getSettingValue<int>("dCR");
+		fancy::settings.dCG = Mod::get()->getSettingValue<int>("dCG");
+		fancy::settings.dCB = Mod::get()->getSettingValue<int>("dCB");
+		fancy::settings.rgbSpeed = Mod::get()->getSettingValue<float>("rgb-speed") * 0.1f;
+		fancy::settings.changeRadius = Mod::get()->getSettingValue<bool>("change-radius");
 		if (!fancy::settings.changeParticles) return true;
 
 		// get fields ready for comparison
