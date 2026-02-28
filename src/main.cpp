@@ -53,13 +53,17 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 		if (!fancy::settings.addButton) return true;
 
 		// add settings button
+		auto winSize = CCDirector::sharedDirector()->getWinSize();
 		auto menu = CCMenu::create();
-		menu->setPosition({512.f, 50.f});
+		menu->setPosition({winSize.width * 0.95f, winSize.height * 0.5f});
 		auto spr = CCSprite::create("FP_logoBtn_001.png"_spr);
 		auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(FPGarageLayer::onLogoBtn));
 		btn->setAnchorPoint({0.5f, 0.5f});
+		btn->setScale(0.8f);
 		menu->addChild(btn);
 		menu->updateLayout();
+		menu->setID("fancy-menu");
+		btn->setID("fancy-button");
 		this->addChild(menu);
 		return true;
 	}
