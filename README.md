@@ -1,6 +1,6 @@
 # Source code for Fancy Player
 
-This mod allows you to color the little things, overriding the game's default colors. Everything is inside the mod settings.
+This mod allows you to color the decorative player effects, overriding the game's default colors. Everything is inside the mod settings.
 
 Suggestion: I match the colors with my glow color
 
