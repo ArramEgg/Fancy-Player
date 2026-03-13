@@ -10,6 +10,7 @@ namespace fancy
 {
 	struct Settings
 	{
+		// p1 settings
 		bool p1ChangeParticles = false;
 		bool p1RainbowParticles = false;
 		ccColor4B p1StartColor = {255, 255, 255, 255};
@@ -22,6 +23,7 @@ namespace fancy
 		bool p1ChangeSpiderDash = false;
 		bool p1RainbowSpiderDash = false;
 		ccColor3B p1SpiderDashColor = {255, 255, 255};
+		// p2 settings
 		bool p2Enable = false;
 		bool p2ChangeParticles = false;
 		bool p2RainbowParticles = false;
@@ -35,6 +37,7 @@ namespace fancy
 		bool p2ChangeSpiderDash = false;
 		bool p2RainbowSpiderDash = false;
 		ccColor3B p2SpiderDashColor = {255, 255, 255};
+		// global settings
 		float rgbSpeed = 0.1f;
 		bool changeRadius = false;
 		bool addButton = false;
@@ -83,28 +86,6 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 	}
 }; // add button to garage
 
-/*
-class $modify(FPPauseLayer, PauseLayer) {
-	void customSetup() {
-		PauseLayer::customSetup();
-		
-		// create button
-		auto spr = CCSprite::create("FP_logoBtn_001.png"_spr);
-		auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(FPPauseLayer::onLogoBtn));
-		btn->setAnchorPoint({0.5f, 0.5f});
-		btn->setID("fancy-button");
-		
-		// add button
-		if (auto menu = this->getChildByID("right-button-menu")) {
-			menu->addChild(btn);
-			menu->updateLayout();
-		}
-	}
-	void onLogoBtn(CCObject *) {
-		openSettingsPopup(Mod::get());
-	}
-}; // add button to pause menu
-*/
 
 class $modify(PlayerObject) {
 	static void onModify(auto& self) {
@@ -116,7 +97,6 @@ class $modify(PlayerObject) {
 	struct Fields {
 		bool lastUpsideDown = false;
 		PlayerMode lastMode = Cube;
-		float lastVehicleSize = 1.f;
 		std::unordered_map<CCParticleSystemQuad*, float> baseRadius;
 		float hue = 0.f;
 		float lastHue = 0.f;
@@ -126,7 +106,7 @@ class $modify(PlayerObject) {
 
 
 	/* -------------
-	Chapter 1: Hooks
+	Section 1: Hooks
 	--------------*/
 
 
@@ -210,7 +190,6 @@ class $modify(PlayerObject) {
 		// get fields ready for comparison
 		m_fields->lastUpsideDown = m_isUpsideDown;
 		m_fields->lastMode = getCurrentMode();
-		m_fields->lastVehicleSize = m_vehicleSize;
 		m_fields->lastOnGround = m_isOnGround2;
 		return true;
 	} // end of PlayerObject:init()
@@ -257,6 +236,12 @@ class $modify(PlayerObject) {
 	} // call on player reset
 
 
+	void togglePlayerScale(bool enable, bool noEffects) {
+		PlayerObject::togglePlayerScale(enable, noEffects);
+		modifyParticleRadius();
+	} // call on size changes
+
+
     void update(float dt) {
         PlayerObject::update(dt);
 
@@ -279,11 +264,10 @@ class $modify(PlayerObject) {
 			} // color particles per frame if rainbow fade is on
 			else {
 				PlayerMode mode = getCurrentMode();
-				if (m_isUpsideDown != m_fields->lastUpsideDown || mode != m_fields->lastMode || m_vehicleSize != m_fields->lastVehicleSize || m_isOnGround2 != m_fields->lastOnGround) {
+				if (m_isUpsideDown != m_fields->lastUpsideDown || mode != m_fields->lastMode || m_isOnGround2 != m_fields->lastOnGround) {
 					// update fields when changes occur
 					m_fields->lastUpsideDown = m_isUpsideDown;
 					m_fields->lastMode = mode;
-					m_fields->lastVehicleSize = m_vehicleSize;
 					m_fields->lastOnGround = m_isOnGround2;
 					// color particles after changes
 					modifyPlayerParticles();
@@ -291,7 +275,6 @@ class $modify(PlayerObject) {
 			} // otherwise only color on changes
 		} // change particles
 
-		
 		if (rainbowDashFire) {
 			if (m_fields->lastHue != m_fields->hue) {
 				updateDashColor();
@@ -310,7 +293,7 @@ class $modify(PlayerObject) {
 
 
 	/*-------------------------
-	Chapter 2: Custom functions
+	Section 2: Custom functions
 	-------------------------*/
 
 	
@@ -389,12 +372,6 @@ class $modify(PlayerObject) {
 			p->setStartColor(fancy::settings.p1StartColorF);
 			p->setEndColor(fancy::settings.p1FinishColorF);
 		} // normal color p1
-		if (!fancy::settings.changeRadius) return;
-		if (!m_fields->baseRadius.contains(p)) {
-			m_fields->baseRadius[p] = p->getStartRadius();
-		} // radius scale
-		float base = m_fields->baseRadius[p];
-		p->setStartRadius(base * m_vehicleSize);
     } // function to modify particles
 
 
@@ -413,14 +390,41 @@ class $modify(PlayerObject) {
 	} // select which particle systems to modify
 
 
+	void modifyParticleRadius() {
+		modifyRadius(m_playerGroundParticles);
+		modifyRadius(m_trailingParticles);
+		modifyRadius(m_shipClickParticles);
+		modifyRadius(m_vehicleGroundParticles);
+		modifyRadius(m_ufoClickParticles);
+		modifyRadius(m_robotBurstParticles);
+		modifyRadius(m_dashParticles);
+		modifyRadius(m_swingBurstParticles1);
+		modifyRadius(m_swingBurstParticles2);
+		modifyRadius(m_landParticles0);
+		modifyRadius(m_landParticles1);
+	} // select which particle systems to modify radius of
+
+
+	void modifyRadius(CCParticleSystemQuad* p) {
+		if (!fancy::settings.changeRadius) return;
+		if (!p) return;
+		if (!m_fields->baseRadius.contains(p)) {
+			m_fields->baseRadius[p] = p->getStartRadius();
+		} // radius scale
+		float base = m_fields->baseRadius[p];
+		p->setStartRadius(base * m_vehicleSize);
+	} // function to modify emiiter type 1 radius
+
+
 	void updateDashColor() {
 		if (!m_dashFireSprite) return;
 		colorDashSprite(m_dashFireSprite);
 		m_fields->lastHue = m_fields->hue;
 	} // color dash fire sprite
 
+
 	/*---------------------------------
-	Chapter 3: Custom Utility Functions
+	Section 3: Custom Utility Functions
 	---------------------------------*/
 
 
