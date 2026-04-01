@@ -1,4 +1,4 @@
-# Fancy Player
+# Unpretentious Player
 
 This mod allows you to change NOTHING about the game.
 
