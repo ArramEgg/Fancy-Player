@@ -1,19 +1,19 @@
 # Fancy Player
 
-This mod allows you to color the decorative player effects, overriding the game's default colors. Everything is inside the mod settings.
+This mod allows you to change NOTHING about the game.
 
-Suggestion: I match the colors with my glow color
+Suggestion: April Fools'!
 
 ## Main Features
 
-* Override startColor and finishColor of player particles
-* Override the color of the dash fire
-* Override the color of the spider dash effect
-* Fading rainbow effect can be applied to all of the above
-* Separate dual settings for all of the above
-* Adjustable rainbow fade speed
+* NOT Override startColor and finishColor of player particles
+* NOT Override the color of the dash fire
+* NOT Override the color of the spider dash effect
+* Fading rainbow effect can NOT be applied to all of the above
+* NOT Separate dual settings for all of the above
+* NO Adjustable rainbow fade speed
 
 ## Miscellaneous Features
 
-* Option to scale radius emitters' maxRadius with player size
-* Button in garage for easy-access mod settings
+* NO Option to scale radius emitters' maxRadius with player size
+* NO Button in garage for easy-access mod settings
