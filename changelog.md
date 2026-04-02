@@ -1,6 +1,5 @@
-# 1.2.3-beta.67
-- April Fools'!
-	- Nothing changed... you're welcome
+# 1.2.3
+- Removed April Fools' changes
 
 # 1.2.2
 - Slight optimizations

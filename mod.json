@@ -7,10 +7,10 @@
 		"ios": "2.2081"
 	},
 	"id": "arram.fancy-player",
-	"name": "Unpretentious Player",
-	"version": "v1.2.3-beta.67",
+	"name": "Fancy Player",
+	"version": "v1.2.3",
 	"developer": "Arram",
-	"description": "Now you can be just like everyone else",
+	"description": "Now you can be extra",
 	"links": {
 		"source": "https://github.com/ArramEgg/Fancy-Player"
 	},
