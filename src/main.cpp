@@ -1,49 +1,19 @@
 #include <Geode/Geode.hpp>
-#include <Geode/modify/PauseLayer.hpp>
+#include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/GJGarageLayer.hpp>
+#include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/ui/GeodeUI.hpp>
+#include "SettingsMenu.hpp"
+#include "Utilities.hpp"
+#include "Settings.hpp"
 
 using namespace geode::prelude;
 
 namespace fancy
 {
-	struct Settings
-	{
-		// p1 settings
-		bool p1ChangeParticles = false;
-		bool p1RainbowParticles = false;
-		ccColor4B p1StartColor = {255, 255, 255, 255};
-		ccColor4F p1StartColorF = {1.f, 1.f, 1.f, 1.f};
-		ccColor4B p1FinishColor = {255, 255, 255, 255};
-		ccColor4F p1FinishColorF = {1.f, 1.f, 1.f, 1.f};
-		bool p1ChangeDashFire = false;
-		bool p1RainbowDashFire = false;
-		ccColor3B p1DashFireColor = {255, 255, 255};
-		bool p1ChangeSpiderDash = false;
-		bool p1RainbowSpiderDash = false;
-		ccColor3B p1SpiderDashColor = {255, 255, 255};
-		// p2 settings
-		bool p2Enable = false;
-		bool p2ChangeParticles = false;
-		bool p2RainbowParticles = false;
-		ccColor4B p2StartColor = {255, 255, 255, 255};
-		ccColor4F p2StartColorF = {1.f, 1.f, 1.f, 1.f};
-		ccColor4B p2FinishColor = {255, 255, 255, 255};
-		ccColor4F p2FinishColorF = {1.f, 1.f, 1.f, 1.f};
-		bool p2ChangeDashFire = false;
-		bool p2RainbowDashFire = false;
-		ccColor3B p2DashFireColor = {255, 255, 255};
-		bool p2ChangeSpiderDash = false;
-		bool p2RainbowSpiderDash = false;
-		ccColor3B p2SpiderDashColor = {255, 255, 255};
-		// global settings
-		float rgbSpeed = 0.1f;
-		bool changeRadius = false;
-		bool addButton = false;
-	} settings;
+	Settings settings;
 } // mod settings
-
 
 enum PlayerMode {
     Cube,
@@ -60,18 +30,16 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 	bool init() {
 		if (!GJGarageLayer::init()) return false;
 
-		// make button or nah?
-		fancy::settings.addButton = Mod::get()->getSettingValue<bool>("add-button");
-		if (!fancy::settings.addButton) return true;
-
 		// create the things
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
 		auto menu = CCMenu::create();
-		menu->setPosition({winSize.width * 0.95f, winSize.height * 0.44f});
+		menu->setContentSize({50.f, 50.f});
+		menu->setPosition({winSize.width * 0.9f, winSize.height * 0.4f});
 		auto spr = CCSprite::create("FP_logoBtn_001.png"_spr);
+		spr->setScale(0.8f);
 		auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(FPGarageLayer::onLogoBtn));
 		btn->setAnchorPoint({0.5f, 0.5f});
-		btn->setScale(0.8f);
+		btn->setPosition({25.f, 25.f});
 		menu->setID("fancy-menu");
 		btn->setID("fancy-button");
 
@@ -82,14 +50,37 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 		return true;
 	}
 	void onLogoBtn(CCObject *) {
-		openSettingsPopup(Mod::get());
+		FancyPopup::create()->show();
 	}
 }; // add button to garage
 
 
-class $modify(PlayerObject) {
+class $modify(FPPauseLayer, PauseLayer) {
+	void customSetup() {
+		PauseLayer::customSetup();
+		
+		// create button
+		auto spr = CCSprite::create("FP_logoBtn_001.png"_spr);
+		spr->setScale(0.65f);
+		auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(FPPauseLayer::onLogoBtn));
+		btn->setAnchorPoint({0.5f, 0.5f});
+		btn->setID("fancy-button");
+		
+		// add button
+		if (auto menu = this->getChildByID("right-button-menu")) {
+			menu->addChild(btn);
+			menu->updateLayout();
+		}
+	}
+	void onLogoBtn(CCObject *) {
+		FancyPopup::create()->show();
+	}
+}; // add button to pause menu
+
+
+class $modify(FPPlayerObject, PlayerObject) {
 	static void onModify(auto& self) {
-		// set updateDashAnimation to last so Mega Hack doesn't override it
+		// set updateDashAnimation to last so Mega Hack doesn't mysteriously override it
 		(void)self.setHookPriorityPost("PlayerObject::updateDashAnimation", Priority::Last);
 	} // hook priorities (with explanations)
 
@@ -102,12 +93,34 @@ class $modify(PlayerObject) {
 		float lastHue = 0.f;
 		bool lastOnGround = false;
 		bool runHue = false;
+		int playerStreak = GameManager::sharedState()->getPlayerStreak();
 	}; // fields for comparing changes
 
 
 	/* -------------
 	Section 1: Hooks
 	--------------*/
+
+
+	void activateStreak() {
+		PlayerObject::activateStreak();
+		if (fancy::settings.streakConfigure && fancy::settings.streakStrokeEnable && !fancy::settings.customStreak) {
+			if (m_isDart) {
+				this->m_regularTrail->setStroke(fancy::settings.streakStroke * m_vehicleSize * 0.5f);
+			}
+			else {
+				this->m_regularTrail->setStroke(fancy::settings.streakStroke * m_vehicleSize);
+			}
+		}
+		if (fancy::settings.customStreak) {
+			if (m_isDart) {
+				this->m_regularTrail->setStroke(26.f * m_vehicleSize * 0.5f);
+			}
+			else {
+				this->m_regularTrail->setStroke(26.f * m_vehicleSize);
+			}
+		}
+	} // call when streak is activated
 
 
 	void hitGround(GameObject* object, bool notFlipped) {
@@ -121,68 +134,6 @@ class $modify(PlayerObject) {
 
 	bool init(int player, int ship, GJBaseGameLayer * gameLayer, cocos2d::CCLayer * layer, bool playLayer) {
 		if (!PlayerObject::init(player, ship, gameLayer, layer, playLayer)) return false;
-
-		// THE GREAT WALL OF SETTINGS
-		/*---------------
-		player 1 settings
-		---------------*/
-		fancy::settings.p1ChangeParticles = Mod::get()->getSettingValue<bool>("p1-change-particles");
-		fancy::settings.p1RainbowParticles = Mod::get()->getSettingValue<bool>("p1-rainbow-particles");
-		fancy::settings.p1StartColor = Mod::get()->getSettingValue<ccColor4B>("p1-start-color");
-		fancy::settings.p1StartColorF = { // p1 startColor float
-				fancy::settings.p1StartColor.r / 255.f,
-				fancy::settings.p1StartColor.g / 255.f,
-				fancy::settings.p1StartColor.b / 255.f,
-				fancy::settings.p1StartColor.a / 255.f
-			};
-		fancy::settings.p1FinishColor = Mod::get()->getSettingValue<ccColor4B>("p1-finish-color");
-		fancy::settings.p1FinishColorF = { // p1 finishColor float
-				fancy::settings.p1FinishColor.r / 255.f,
-				fancy::settings.p1FinishColor.g / 255.f,
-				fancy::settings.p1FinishColor.b / 255.f,
-				fancy::settings.p1FinishColor.a / 255.f
-			};
-		fancy::settings.p1ChangeDashFire = Mod::get()->getSettingValue<bool>("p1-change-dash-fire");
-		fancy::settings.p1RainbowDashFire = Mod::get()->getSettingValue<bool>("p1-rainbow-dash-fire");
-		fancy::settings.p1DashFireColor = Mod::get()->getSettingValue<ccColor3B>("p1-dash-fire-color");
-		fancy::settings.p1ChangeSpiderDash = Mod::get()->getSettingValue<bool>("p1-change-spider-dash");
-		fancy::settings.p1RainbowSpiderDash = Mod::get()->getSettingValue<bool>("p1-rainbow-spider-dash");
-		fancy::settings.p1SpiderDashColor = Mod::get()->getSettingValue<ccColor3B>("p1-spider-dash-color");
-		/*---------------
-		player 2 settings
-		---------------*/
-		fancy::settings.p2Enable = Mod::get()->getSettingValue<bool>("p2-enable");
-		fancy::settings.p2ChangeParticles = Mod::get()->getSettingValue<bool>("p2-change-particles");
-		fancy::settings.p2RainbowParticles = Mod::get()->getSettingValue<bool>("p2-rainbow-particles");
-		fancy::settings.p2StartColor = Mod::get()->getSettingValue<ccColor4B>("p2-start-color");
-		fancy::settings.p2StartColorF = { // p2 startColor float
-				fancy::settings.p2StartColor.r / 255.f,
-				fancy::settings.p2StartColor.g / 255.f,
-				fancy::settings.p2StartColor.b / 255.f,
-				fancy::settings.p2StartColor.a / 255.f
-			};
-		fancy::settings.p2FinishColor = Mod::get()->getSettingValue<ccColor4B>("p2-finish-color");
-		fancy::settings.p2FinishColorF = { // p2 finishColor float
-				fancy::settings.p2FinishColor.r / 255.f,
-				fancy::settings.p2FinishColor.g / 255.f,
-				fancy::settings.p2FinishColor.b / 255.f,
-				fancy::settings.p2FinishColor.a / 255.f
-			};
-		fancy::settings.p2ChangeDashFire = Mod::get()->getSettingValue<bool>("p2-change-dash-fire");
-		fancy::settings.p2RainbowDashFire = Mod::get()->getSettingValue<bool>("p2-rainbow-dash-fire");
-		fancy::settings.p2DashFireColor = Mod::get()->getSettingValue<ccColor3B>("p2-dash-fire-color");
-		fancy::settings.p2ChangeSpiderDash = Mod::get()->getSettingValue<bool>("p2-change-spider-dash");
-		fancy::settings.p2RainbowSpiderDash = Mod::get()->getSettingValue<bool>("p2-rainbow-spider-dash");
-		fancy::settings.p2SpiderDashColor = Mod::get()->getSettingValue<ccColor3B>("p2-spider-dash-color");
-		/*-------------
-		global settings
-		-------------*/
-		fancy::settings.rgbSpeed = Mod::get()->getSettingValue<float>("rgb-speed") * 0.1f;
-		fancy::settings.changeRadius = Mod::get()->getSettingValue<bool>("change-radius");
-		// END OF SETTINGS
-
-		// update hue or nah?
-		m_fields->runHue = fancy::settings.p1RainbowParticles || fancy::settings.p1RainbowDashFire || fancy::settings.p1RainbowSpiderDash || (fancy::settings.p2Enable && (fancy::settings.p2RainbowParticles || fancy::settings.p2RainbowDashFire || fancy::settings.p2RainbowSpiderDash));
 
 		// no need to update fields without particles
 		if (!fancy::settings.p1ChangeParticles && !fancy::settings.p2ChangeParticles) return true;
@@ -205,13 +156,12 @@ class $modify(PlayerObject) {
 
 
 	void playSpiderDashEffect(CCPoint from, CCPoint to) {
-		auto parent = this->getParent();
-		int before = parent->getChildrenCount();
+		int before = GJBaseGameLayer::get()->m_objectLayer->getChildrenCount();
 		PlayerObject::playSpiderDashEffect(from, to);
-		int after = parent->getChildrenCount();
+		int after = GJBaseGameLayer::get()->m_objectLayer->getChildrenCount();
 		
 		for (int i = before; i < after; ++i) {
-			auto child = parent->getChildByIndex(i);
+			auto child = GJBaseGameLayer::get()->m_objectLayer->getChildByIndex(i);
 			if (auto sprite = typeinfo_cast<CCSprite*>(child)) {
 				colorSpiderDashSprite(sprite);
 			}
@@ -230,35 +180,118 @@ class $modify(PlayerObject) {
 		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
 		if (!changeParticles) return;
 		
-		// epic hack doubles as a mega hack reset fix + UFO reset bug fix
+		// epic hack doubles as a mega hack reset fix + UFO reset bug fix (forces update next tick)
 		m_fields->lastMode = static_cast<PlayerMode>((getCurrentMode() + 1) % 7);
 		modifyPlayerParticles();
 	} // call on player reset
 
 
+	void resetStreak() {
+		PlayerObject::resetStreak();
+		if (fancy::settings.customStreak) {
+			CCPoint pos = this->getPosition();
+			this->m_regularTrail->setPosition(pos + ccp(5.f, 0.f));
+		}
+	} // dumb hack to reduce custom streak flipping, mainly on level start
+
+
+	void setupStreak() {
+		PlayerObject::setupStreak();
+		if (fancy::settings.streakConfigure && !fancy::settings.customStreak) {
+			if (fancy::settings.streakFadeEnable) {
+				this->m_regularTrail->updateFade(fancy::settings.streakFade);
+			}
+			if (fancy::settings.streakRepeatEnable) {
+				if (fancy::settings.streakRepeat > 0.f) {
+					this->m_regularTrail->enableRepeatMode(fancy::settings.streakRepeat);
+				}
+				else {
+					this->m_regularTrail->m_bRepeatMode = false;
+				}
+			}
+			if (fancy::settings.streakBlend) {
+				this->m_regularTrail->setBlendFunc({GL_ONE, GL_ONE_MINUS_SRC_ALPHA});
+			}
+			if (fancy::settings.streakAlwaysShow) {
+				this->m_alwaysShowStreak = true;
+			}
+		} // streak slop
+		if (fancy::settings.customStreak) {
+			this->m_regularTrail->updateFade(1.f);
+			this->m_regularTrail->setStroke(26.f);
+			this->m_regularTrail->m_bRepeatMode = false;
+			this->m_regularTrail->setTexture(CCTextureCache::sharedTextureCache()->addImage("customStreak_001.png"_spr, 0));
+			this->m_regularTrail->setOpacity(255);
+			this->m_regularTrail->setDontOpacityFade(true);
+			this->m_regularTrail->setBlendFunc({GL_ONE, GL_ONE_MINUS_SRC_ALPHA});
+			this->m_alwaysShowStreak = true;
+		} // absolute cinema
+	} // call on streak setup 
+
+
+	void toggleDartMode(bool enable, bool noEffects) {
+		PlayerObject::toggleDartMode(enable, noEffects);
+		if (fancy::settings.streakConfigure && fancy::settings.streakStrokeEnable && !fancy::settings.customStreak) {
+			if (m_isDart) {
+				this->m_regularTrail->setStroke(fancy::settings.streakStroke * m_vehicleSize * 0.5f);
+			}
+			else {
+				this->m_regularTrail->setStroke(fancy::settings.streakStroke * m_vehicleSize);
+			}
+		}
+		if (fancy::settings.customStreak) {
+			if (m_isDart) {
+				this->m_regularTrail->setStroke(26.f * m_vehicleSize * 0.5f);
+			}
+			else {
+				this->m_regularTrail->setStroke(26.f * m_vehicleSize);
+			}
+		}
+	} // evil
+
+
 	void togglePlayerScale(bool enable, bool noEffects) {
 		PlayerObject::togglePlayerScale(enable, noEffects);
 		modifyParticleRadius();
+		if (fancy::settings.streakConfigure && fancy::settings.streakStrokeEnable && !fancy::settings.customStreak) {
+			if (m_isDart) {
+				this->m_regularTrail->setStroke(fancy::settings.streakStroke * m_vehicleSize * 0.5f);
+			}
+			else {
+				this->m_regularTrail->setStroke(fancy::settings.streakStroke * m_vehicleSize);
+			}
+		}
+		if (fancy::settings.customStreak) {
+			if (m_isDart) {
+				this->m_regularTrail->setStroke(26.f * m_vehicleSize * 0.5f);
+			}
+			else {
+				this->m_regularTrail->setStroke(26.f * m_vehicleSize);
+			}
+		}
 	} // call on size changes
 
 
     void update(float dt) {
         PlayerObject::update(dt);
 
+		// update hue or nah?
+		m_fields->runHue = fancy::settings.p1RainbowParticles || fancy::settings.p1RainbowDashFire || fancy::settings.p1RainbowSpiderDash || fancy::settings.p1RainbowStreak || (fancy::settings.p2Enable && (fancy::settings.p2RainbowParticles || fancy::settings.p2RainbowDashFire || fancy::settings.p2RainbowSpiderDash || fancy::settings.p2RainbowStreak));
+
 		if (m_fields->runHue) {
-				m_fields->hue += dt * fancy::settings.rgbSpeed;
+			m_fields->hue += dt * (fancy::settings.rgbSpeed * 0.05f);
 			if (m_fields->hue > 1.f) m_fields->hue -= 1.f;
 		} // update hue for rainbow effects
 
 		// player 2 check
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
+		// update effects if player 1 or 2 is enabled (player 2 check is done in each effect's respective function)
 		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
 		bool rainbowParticles = p2 ? fancy::settings.p2RainbowParticles : fancy::settings.p1RainbowParticles;
 		bool rainbowDashFire = p2 ? fancy::settings.p2RainbowDashFire : fancy::settings.p1RainbowDashFire;
-		// end of player 2 check
+		bool changeStreak = fancy::settings.p1ChangeStreak || (fancy::settings.p2Enable && fancy::settings.p2ChangeStreak);
 
 		if (changeParticles) {
-			
 			if (rainbowParticles) {
 				modifyPlayerParticles();
 			} // color particles per frame if rainbow fade is on
@@ -270,16 +303,30 @@ class $modify(PlayerObject) {
 					m_fields->lastMode = mode;
 					m_fields->lastOnGround = m_isOnGround2;
 					// color particles after changes
-					modifyPlayerParticles();
+					if (changeParticles) {
+						modifyPlayerParticles();
+					}
 				} // check for player changes
 			} // otherwise only color on changes
-		} // change particles
+		} // change particles if enabled
 
+		if (fancy::settings.customStreak) {
+			this->m_regularTrail->tintWithColor({255, 255, 255});
+		} // bruh
+		
 		if (rainbowDashFire) {
 			if (m_fields->lastHue != m_fields->hue) {
 				updateDashColor();
 			} // avoid double update just in case
 		} // rainbow dash fire
+
+		if (changeStreak) {
+			modifyPlayerStreak();
+		} // ROW, ROW, FIGHT THE POWAH
+
+		if (m_isDart && (fancy::settings.streakAlignWave || fancy::settings.customStreak)) {
+			this->m_regularTrail->setPosition(this->getPosition());
+		} // align streak to wave
     } // put stuff here to update/check per tick
 
 
@@ -292,9 +339,52 @@ class $modify(PlayerObject) {
 	} // color dash fire
 
 
+	void updateShipRotation(float dt) {
+		PlayerObject::updateShipRotation(dt);
+		alignParticlesToPlayer();
+		alignStreakToPlayer();
+	} // ROW, ROW, FIGHT THE POWAH
+
+
+	void updateStreakBlend(bool blend) {	
+		PlayerObject::updateStreakBlend(blend);
+		if ((fancy::settings.streakBlend && fancy::settings.streakConfigure) || fancy::settings.customStreak) {
+			this->m_regularTrail->setBlendFunc({GL_ONE, GL_ONE_MINUS_SRC_ALPHA});
+		}
+	} // disable additive blending if enabled
+
+
 	/*-------------------------
 	Section 2: Custom functions
 	-------------------------*/
+
+
+	void alignParticlesToPlayer() {
+		if (!fancy::settings.alignParticles) return;
+		if (!(m_isShip || m_isBird)) return;
+		bool reverse = m_isGoingLeft;
+		float plusMinus = reverse ? 10.f : -10.f;
+		CCPoint offset = ccpRotateByAngle({plusMinus * m_vehicleSize, 0.f}, {0.f, 0.f}, -CC_DEGREES_TO_RADIANS(this->getRotation()));
+		CCPoint alignPoint = ccpAdd(this->getPosition(), offset);
+
+		auto alignParticle = [alignPoint](CCParticleSystemQuad* p) {
+			if (!p) return;
+			p->setPosition(alignPoint);
+		}; // c++ is cool, yo
+
+		alignParticle(m_shipClickParticles);
+		alignParticle(m_ufoClickParticles);
+		alignParticle(m_trailingParticles);
+	} // align ship/ufo particles if enabled
+
+
+	void alignStreakToPlayer() {
+		if (!(m_isShip || m_isBird)) return;
+		if (!this->m_regularTrail) return;
+		if ((fancy::settings.customStreak) || (fancy::settings.streakConfigure && fancy::settings.streakAlign)) {
+			this->m_regularTrail->setPosition(this->getPosition());
+		}
+	} // align custom streak if enabled
 
 	
 	void colorDashSprite(CCSprite* d) {
@@ -302,8 +392,8 @@ class $modify(PlayerObject) {
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
 		bool rainbowDashFire = p2 ? fancy::settings.p2RainbowDashFire : fancy::settings.p1RainbowDashFire;
 		if (rainbowDashFire) {
-			cocos2d::ccColor4F color = HSVtoRGB(m_fields->hue, 1.f, 1.f, 1.f);
-			d->setColor(color4Fto3B(color));
+			cocos2d::ccColor4F color = FancyPlayer::HSVtoRGB(m_fields->hue, 1.f, 1.f, 1.f);
+			d->setColor(FancyPlayer::color4Fto3B(color));
 			return;
 		}
 		if (p2 && fancy::settings.p2ChangeDashFire) {
@@ -321,8 +411,8 @@ class $modify(PlayerObject) {
 		ccColor3B col;
 		bool rainbowSpiderDash = p2 ? fancy::settings.p2RainbowSpiderDash : fancy::settings.p1RainbowSpiderDash;
 		if (rainbowSpiderDash) {
-			cocos2d::ccColor4F color = HSVtoRGB(m_fields->hue, 1.f, 1.f, 1.f);
-			col = color4Fto3B(color);
+			cocos2d::ccColor4F color = FancyPlayer::HSVtoRGB(m_fields->hue, 1.f, 1.f, 1.f);
+			col = FancyPlayer::color4Fto3B(color);
 			c->m_color = col;
 			return;
 		}
@@ -339,8 +429,8 @@ class $modify(PlayerObject) {
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
 		bool rainbowSpiderDash = p2 ? fancy::settings.p2RainbowSpiderDash : fancy::settings.p1RainbowSpiderDash;
 		if (rainbowSpiderDash) {
-			cocos2d::ccColor4F color = HSVtoRGB(m_fields->hue, 1.f, 1.f, 1.f);
-			s->setColor(color4Fto3B(color));
+			cocos2d::ccColor4F color = FancyPlayer::HSVtoRGB(m_fields->hue, 1.f, 1.f, 1.f);
+			s->setColor(FancyPlayer::color4Fto3B(color));
 			return;
 		}
 		if (p2 && fancy::settings.p2ChangeSpiderDash) {
@@ -359,8 +449,8 @@ class $modify(PlayerObject) {
 		if (rainbowParticles) {
 			float startAlpha = p2 ? fancy::settings.p2StartColorF.a : fancy::settings.p1StartColorF.a;
 			float finishAlpha = p2 ? fancy::settings.p2FinishColorF.a : fancy::settings.p1FinishColorF.a;
-			cocos2d::ccColor4F startColor = HSVtoRGB(m_fields->hue, 1.f, 1.f, startAlpha);
-			cocos2d::ccColor4F endColor = HSVtoRGB(m_fields->hue, 1.f, 1.f, finishAlpha);
+			cocos2d::ccColor4F startColor = FancyPlayer::HSVtoRGB(m_fields->hue, 1.f, 1.f, startAlpha);
+			cocos2d::ccColor4F endColor = FancyPlayer::HSVtoRGB(m_fields->hue, 1.f, 1.f, finishAlpha);
 			p->setStartColor(startColor);
 			p->setEndColor(endColor);
 		} // rainbow color
@@ -374,6 +464,24 @@ class $modify(PlayerObject) {
 		} // normal color p1
     } // function to modify particles
 
+	void modifyPlayerStreak() {
+		if (!this->m_regularTrail) return;
+		if (fancy::settings.customStreak) return;
+		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
+		ccColor3B streakColor = p2 ? fancy::settings.p2StreakColor : fancy::settings.p1StreakColor;
+		bool rainbowStreak = p2 ? fancy::settings.p2RainbowStreak : fancy::settings.p1RainbowStreak;
+		if (rainbowStreak) {
+			cocos2d::ccColor4F color = FancyPlayer::HSVtoRGB(m_fields->hue, 1.f, 1.f, 1.f);
+			this->m_regularTrail->tintWithColor(FancyPlayer::color4Fto3B(color));
+			return;
+		}
+		if (m_regularTrail->getColor() == streakColor) return;
+		if (p2 && fancy::settings.p2ChangeStreak) {
+			this->m_regularTrail->tintWithColor(fancy::settings.p2StreakColor);
+			return;
+		}
+		this->m_regularTrail->tintWithColor(fancy::settings.p1StreakColor);
+	} // function to modify streak
 
 	void modifyPlayerParticles() {
 		modifyParticles(m_playerGroundParticles);
@@ -405,7 +513,7 @@ class $modify(PlayerObject) {
 	} // select which particle systems to modify radius of
 
 
-	void modifyRadius(CCParticleSystemQuad* p) {
+	void modifyRadius(CCParticleSystemQuad* p) { // probably a good idea to make this check if the emitter type is radius
 		if (!fancy::settings.changeRadius) return;
 		if (!p) return;
 		if (!m_fields->baseRadius.contains(p)) {
@@ -422,39 +530,10 @@ class $modify(PlayerObject) {
 		m_fields->lastHue = m_fields->hue;
 	} // color dash fire sprite
 
-
+	
 	/*---------------------------------
 	Section 3: Custom Utility Functions
 	---------------------------------*/
-
-
-	ccColor3B color4Fto3B(cocos2d::ccColor4F c) {
-		return {
-			static_cast<GLubyte>(c.r * 255),
-			static_cast<GLubyte>(c.g * 255),
-			static_cast<GLubyte>(c.b * 255)
-		};
-	} // get 3 byte color from 4 float color (output from hue shifter) for sprites
-
-
-	cocos2d::ccColor4F HSVtoRGB(float h, float s, float v, float a) {
-		float r, g, b;
-		int i = static_cast<int>(h * 6);
-		float f = h * 6 - i;
-		float p = v * (1 - s);
-		float q = v * (1 - f * s);
-		float t = v * (1 - (1 - f) * s);
-		switch (i % 6) {
-			case 0: r = v; g = t; b = p; break;
-			case 1: r = q; g = v; b = p; break;
-			case 2: r = p; g = v; b = t; break;
-			case 3: r = p; g = q; b = v; break;
-			case 4: r = t; g = p; b = v; break;
-			case 5: r = v; g = p; b = q; break;
-		}
-		return {r, g, b, a};
-	} // hue shifter
-
 	
 	PlayerMode getCurrentMode() {
 		if (m_isShip) return Ship;
