@@ -93,7 +93,6 @@ class $modify(FPPlayerObject, PlayerObject) {
 		float lastHue = 0.f;
 		bool lastOnGround = false;
 		bool runHue = false;
-		int playerStreak = GameManager::sharedState()->getPlayerStreak();
 	}; // fields for comparing changes
 
 
