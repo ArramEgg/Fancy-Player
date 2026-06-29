@@ -1,3 +1,9 @@
+# 1.3.1
+- Added color to the mod's description text (wooowwww)
+- Changed some default settings (default colors are still mine loool)
+- Changed some labels' fonts in the menu for consistency
+- Removed the old message in the Geode settings menu
+
 # 1.3.0
 - Added custom settings menu with themes
 - Added button to pause menu with live updates

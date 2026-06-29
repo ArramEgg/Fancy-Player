@@ -1,3 +1,8 @@
+![Mod Version](https://api.geode-sdk.org/v1/mods/arram.fancy-player/status_badge?stat=version)
+![Downloads](https://api.geode-sdk.org/v1/mods/arram.fancy-player/status_badge?stat=downloads)
+![GD Version](https://api.geode-sdk.org/v1/mods/arram.fancy-player/status_badge?stat=gd_version)
+![Geode Version](https://api.geode-sdk.org/v1/mods/arram.fancy-player/status_badge?stat=geode_version)
+
 # Source Code for Fancy Player
 
 This mod allows you to color and configure the decorative player effects, overriding the game's default colors and configuration. Everything is inside the mod settings.
@@ -27,4 +32,4 @@ Suggestion: I match the colors with my glow color
     - Option to better align streak to wave
 - Button in garage for easy access to mod settings
 - Button in pause menu for even easier access to mod settings
-- Mod Menu themes under mod settings
+- Mod Menu themes under Geode mod settings

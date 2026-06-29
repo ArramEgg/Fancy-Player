@@ -8,7 +8,7 @@
 	},
 	"id": "arram.fancy-player",
 	"name": "Fancy Player",
-	"version": "v1.3.0",
+	"version": "v1.3.1",
 	"developer": "Arram",
 	"description": "Now you can be extra",
 	"links": {
@@ -24,11 +24,6 @@
 		"geode.node-ids": ">=v1.22.0"
 	},
 	"settings": {
-		"settings-title": {
-			"type": "title",
-			"name": "Settings have moved!",
-			"description": "Due to the cluttered nature of the Geode settings menu, a custom settings menu has been created. It can be accessed from the mod icons in the garage or pause menus."
-		},
 		"mod-theme": {
 			"type": "string",
 			"name": "Mod Theme",

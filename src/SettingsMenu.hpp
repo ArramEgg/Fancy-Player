@@ -479,21 +479,21 @@ protected:
 		ccosd->setID("configure-spider-dash-label");
 		page1Layer->addChild(ccosd);
 
-		auto enableText1 = CCLabelBMFont::create("<- Enable ->", "goldFont.fnt");
+		auto enableText1 = CCLabelBMFont::create("<- Enable ->", "bigFont.fnt");
 		enableText1->setScale(0.4f);
 		enableText1->setPosition({180.f, 185.f});
 		enableText1->setOpacity(100);
 		enableText1->setID("enable-text-1");
 		page1Layer->addChild(enableText1);
 
-		auto enableText2 = CCLabelBMFont::create("<- Enable ->", "goldFont.fnt");
+		auto enableText2 = CCLabelBMFont::create("<- Enable ->", "bigFont.fnt");
 		enableText2->setScale(0.4f);
 		enableText2->setPosition({180.f, 130.f});
 		enableText2->setOpacity(100);
 		enableText2->setID("enable-text-2");
 		page1Layer->addChild(enableText2);
 
-		auto enableText3 = CCLabelBMFont::create("<- Enable ->", "goldFont.fnt");
+		auto enableText3 = CCLabelBMFont::create("<- Enable ->", "bigFont.fnt");
 		enableText3->setScale(0.4f);
 		enableText3->setPosition({180.f, 90.f});
 		enableText3->setOpacity(100);
@@ -515,7 +515,7 @@ protected:
 		p2rgblbl4->setID("p2-rgb-label-4");
 		page2Layer->addChild(p2rgblbl4);
 
-		auto enableText4 = CCLabelBMFont::create("<- Enable ->", "goldFont.fnt");
+		auto enableText4 = CCLabelBMFont::create("<- Enable ->", "bigFont.fnt");
 		enableText4->setScale(0.4f);
 		enableText4->setPosition({180.f, 200.f});
 		enableText4->setOpacity(100);

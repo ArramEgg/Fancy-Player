@@ -5,7 +5,7 @@ namespace fancy
 	struct Settings
 	{
 		// p1 settings
-		bool p1ChangeParticles = Mod::get()->getSavedValue<bool>("p1-change-particles", true);
+		bool p1ChangeParticles = Mod::get()->getSavedValue<bool>("p1-change-particles", false);
 		bool p1RainbowParticles = Mod::get()->getSavedValue<bool>("p1-rainbow-particles", false);;
 		ccColor4B p1StartColor = Mod::get()->getSavedValue<ccColor4B>("p1-start-color", {61, 69, 255, 255});
 		ccColor4F p1StartColorF = {
@@ -21,10 +21,10 @@ namespace fancy
 				p1FinishColor.b / 255.f,
 				p1FinishColor.a / 255.f
 			};
-		bool p1ChangeDashFire = Mod::get()->getSavedValue<bool>("p1-change-dash-fire", true);
+		bool p1ChangeDashFire = Mod::get()->getSavedValue<bool>("p1-change-dash-fire", false);
 		bool p1RainbowDashFire = Mod::get()->getSavedValue<bool>("p1-rainbow-dash-fire", false);
 		ccColor3B p1DashFireColor = Mod::get()->getSavedValue<ccColor3B>("p1-dash-fire-color", {0, 0, 255});
-		bool p1ChangeSpiderDash = Mod::get()->getSavedValue<bool>("p1-change-spider-dash", true);
+		bool p1ChangeSpiderDash = Mod::get()->getSavedValue<bool>("p1-change-spider-dash", false);
 		bool p1RainbowSpiderDash = Mod::get()->getSavedValue<bool>("p1-rainbow-spider-dash", false);
 		ccColor3B p1SpiderDashColor = Mod::get()->getSavedValue<ccColor3B>("p1-spider-dash-color", {0, 0, 255});
 		bool p1ChangeStreak = Mod::get()->getSavedValue<bool>("p1-change-streak", false);
@@ -32,7 +32,7 @@ namespace fancy
 		ccColor3B p1StreakColor = Mod::get()->getSavedValue<ccColor3B>("p1-streak-color", {0, 0, 255});
 		// p2 settings
 		bool p2Enable = Mod::get()->getSavedValue<bool>("p2-enable", false);
-		bool p2ChangeParticles = Mod::get()->getSavedValue<bool>("p2-change-particles", true);
+		bool p2ChangeParticles = Mod::get()->getSavedValue<bool>("p2-change-particles", false);
 		bool p2RainbowParticles = Mod::get()->getSavedValue<bool>("p2-rainbow-particles", false);
 		ccColor4B p2StartColor = Mod::get()->getSavedValue<ccColor4B>("p2-start-color", {255, 255, 0, 255});
 		ccColor4F p2StartColorF = {
@@ -48,10 +48,10 @@ namespace fancy
 				p2FinishColor.b / 255.f,
 				p2FinishColor.a / 255.f
 			};
-		bool p2ChangeDashFire = Mod::get()->getSavedValue<bool>("p2-change-dash-fire", true);
+		bool p2ChangeDashFire = Mod::get()->getSavedValue<bool>("p2-change-dash-fire", false);
 		bool p2RainbowDashFire = Mod::get()->getSavedValue<bool>("p2-rainbow-dash-fire", false);
 		ccColor3B p2DashFireColor = Mod::get()->getSavedValue<ccColor3B>("p2-dash-fire-color", {255, 255, 0});
-		bool p2ChangeSpiderDash = Mod::get()->getSavedValue<bool>("p2-change-spider-dash", true);
+		bool p2ChangeSpiderDash = Mod::get()->getSavedValue<bool>("p2-change-spider-dash", false);
 		bool p2RainbowSpiderDash = Mod::get()->getSavedValue<bool>("p2-rainbow-spider-dash", false);
 		ccColor3B p2SpiderDashColor = Mod::get()->getSavedValue<ccColor3B>("p2-spider-dash-color", {255, 255, 0});
 		bool p2ChangeStreak = Mod::get()->getSavedValue<bool>("p2-change-streak", false);
