@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/GJGarageLayer.hpp>
+#include <Geode/modify/MenuLayer.hpp>
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/ui/GeodeUI.hpp>
@@ -24,7 +25,6 @@ enum PlayerMode {
     Spider,
     Swing
 }; // enums for custom utility function getCurrentMode() in $modify(PlayerObject)
-
 
 class $modify(FPGarageLayer, GJGarageLayer) {
 	bool init() {
@@ -55,6 +55,15 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 }; // add button to garage
 
 
+class $modify(FPMenuLayer, MenuLayer) {
+	void onQuit(CCObject* sender) {
+		Mod::get()->setSavedValue<int>("menu-page", 1);
+		fancy::settings.menuPage = Mod::get()->getSavedValue<int>("menu-page");
+		MenuLayer::onQuit(sender);
+	}
+}; // emulating "sessions" in a very lazy way
+
+
 class $modify(FPPauseLayer, PauseLayer) {
 	void customSetup() {
 		PauseLayer::customSetup();
@@ -76,6 +85,53 @@ class $modify(FPPauseLayer, PauseLayer) {
 		FancyPopup::create()->show();
 	}
 }; // add button to pause menu
+
+
+class $modify(FPGJBaseGameLayer, GJBaseGameLayer) {
+	static void onModify(auto& self) {
+		// set update to last so Frame Extrapolation doesn't break particle alignment
+		(void)self.setHookPriorityPost("GJBaseGameLayer::update", Priority::Last);
+	} // hook priorities (with explanations)
+
+
+	void update(float dt) {	
+		GJBaseGameLayer::update(dt);
+		alignParticlesToPlayer(m_player1);
+		alignStreakToPlayer(m_player1);
+		if (m_gameState.m_isDualMode) {
+			alignParticlesToPlayer(m_player2);
+			alignStreakToPlayer(m_player2);
+		}
+	} // a man walked into a bar
+
+
+	void alignParticlesToPlayer(PlayerObject* player) {
+		if (!fancy::settings.alignParticles) return;
+		if (!(player->m_isShip || player->m_isBird)) return;
+		bool reverse = player->m_isGoingLeft;
+		float plusMinus = reverse ? 10.f : -10.f;
+		CCPoint offset = ccpRotateByAngle({plusMinus * player->m_vehicleSize, 0.f}, {0.f, 0.f}, -CC_DEGREES_TO_RADIANS(player->getRotation()));
+		CCPoint alignPoint = ccpAdd(player->m_position, offset);
+
+		auto alignParticle = [alignPoint](CCParticleSystemQuad* p) {
+			if (!p) return;
+			p->setPosition(alignPoint);
+		};
+
+		alignParticle(player->m_shipClickParticles);
+		alignParticle(player->m_ufoClickParticles);
+		alignParticle(player->m_trailingParticles);
+	}
+
+
+	void alignStreakToPlayer(PlayerObject* player) {
+		if (!player->m_regularTrail) return;
+
+		if ((player->m_isDart && (fancy::settings.streakAlignWave || fancy::settings.customStreak)) || ((player->m_isShip || player->m_isBird) && ((fancy::settings.customStreak) || (fancy::settings.streakConfigure && fancy::settings.streakAlign)))) {
+			player->m_regularTrail->setPosition(player->m_position);
+		} // W logic
+	}
+};
 
 
 class $modify(FPPlayerObject, PlayerObject) {
@@ -119,7 +175,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 				this->m_regularTrail->setStroke(26.f * m_vehicleSize);
 			}
 		}
-	} // call when streak is activated
+	}
 
 
 	void hitGround(GameObject* object, bool notFlipped) {
@@ -128,7 +184,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
 		if (!changeParticles) return;
 		modifyPlayerParticles();
-	} // call when hitting the ground
+	} // dumb
 
 
 	bool init(int player, int ship, GJBaseGameLayer * gameLayer, cocos2d::CCLayer * layer, bool playLayer) {
@@ -142,7 +198,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 		m_fields->lastMode = getCurrentMode();
 		m_fields->lastOnGround = m_isOnGround2;
 		return true;
-	} // end of PlayerObject:init()
+	}
 
 
 	void loadFromCheckpoint(PlayerCheckpoint* object) {
@@ -151,7 +207,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
 		if (!changeParticles) return;
 		modifyPlayerParticles();
-	} // call when loading from checkpoint
+	}
 
 
 	void playSpiderDashEffect(CCPoint from, CCPoint to) {
@@ -224,8 +280,8 @@ class $modify(FPPlayerObject, PlayerObject) {
 			this->m_regularTrail->setDontOpacityFade(true);
 			this->m_regularTrail->setBlendFunc({GL_ONE, GL_ONE_MINUS_SRC_ALPHA});
 			this->m_alwaysShowStreak = true;
-		} // absolute cinema
-	} // call on streak setup 
+		} // nyan nyan nyan nynan aaaaaaaaaaa AAAAAAAAAAAAAAA
+	}
 
 
 	void toggleDartMode(bool enable, bool noEffects) {
@@ -246,7 +302,20 @@ class $modify(FPPlayerObject, PlayerObject) {
 				this->m_regularTrail->setStroke(26.f * m_vehicleSize);
 			}
 		}
-	} // evil
+	}
+
+
+	void toggleFlyMode(bool enable, bool noEffects) {
+		PlayerObject::toggleFlyMode(enable, noEffects);
+		if (fancy::settings.bigShipFire) {
+			if (this->m_shipStreak) {
+				this->m_shipStreak->setM_fMaxSeg(40.f);
+				this->m_shipStreak->updateFade(.2f * this->m_vehicleSize);
+				this->m_shipStreak->setStroke(25.f * this->m_vehicleSize);
+				this->m_shipStreak->m_fMinSeg = 20.f;
+			}
+		}
+	} // ngl writing all these comments is getting old
 
 
 	void togglePlayerScale(bool enable, bool noEffects) {
@@ -268,7 +337,15 @@ class $modify(FPPlayerObject, PlayerObject) {
 				this->m_regularTrail->setStroke(26.f * m_vehicleSize);
 			}
 		}
-	} // call on size changes
+		if (fancy::settings.bigShipFire) {
+			if (this->m_shipStreak) {
+				this->m_shipStreak->setM_fMaxSeg(30.f);
+				this->m_shipStreak->updateFade(.2f * this->m_vehicleSize);
+				this->m_shipStreak->setStroke(25.f * this->m_vehicleSize);
+				this->m_shipStreak->m_fMinSeg = 20.f;
+			}
+		}
+	}
 
 
     void update(float dt) {
@@ -321,12 +398,8 @@ class $modify(FPPlayerObject, PlayerObject) {
 
 		if (changeStreak) {
 			modifyPlayerStreak();
-		} // ROW, ROW, FIGHT THE POWAH
-
-		if (m_isDart && (fancy::settings.streakAlignWave || fancy::settings.customStreak)) {
-			this->m_regularTrail->setPosition(this->getPosition());
-		} // align streak to wave
-    } // put stuff here to update/check per tick
+		} // yeah
+    }
 
 
 	void updateDashAnimation() {
@@ -338,11 +411,17 @@ class $modify(FPPlayerObject, PlayerObject) {
 	} // color dash fire
 
 
-	void updateShipRotation(float dt) {
-		PlayerObject::updateShipRotation(dt);
-		alignParticlesToPlayer();
-		alignStreakToPlayer();
-	} // ROW, ROW, FIGHT THE POWAH
+	void updateTimeMod(float speed, bool noEffects) {
+		PlayerObject::updateTimeMod(speed, noEffects);
+		if (fancy::settings.bigShipFire) {
+			if (this->m_shipStreak) {
+				this->m_shipStreak->setM_fMaxSeg(30.f);
+				this->m_shipStreak->updateFade(.2f * this->m_vehicleSize);
+				this->m_shipStreak->setStroke(25.f * this->m_vehicleSize);
+				this->m_shipStreak->m_fMinSeg = 20.f;
+			}
+		}
+	} // go listen to my music
 
 
 	void updateStreakBlend(bool blend) {	
@@ -356,34 +435,6 @@ class $modify(FPPlayerObject, PlayerObject) {
 	/*-------------------------
 	Section 2: Custom functions
 	-------------------------*/
-
-
-	void alignParticlesToPlayer() {
-		if (!fancy::settings.alignParticles) return;
-		if (!(m_isShip || m_isBird)) return;
-		bool reverse = m_isGoingLeft;
-		float plusMinus = reverse ? 10.f : -10.f;
-		CCPoint offset = ccpRotateByAngle({plusMinus * m_vehicleSize, 0.f}, {0.f, 0.f}, -CC_DEGREES_TO_RADIANS(this->getRotation()));
-		CCPoint alignPoint = ccpAdd(this->getPosition(), offset);
-
-		auto alignParticle = [alignPoint](CCParticleSystemQuad* p) {
-			if (!p) return;
-			p->setPosition(alignPoint);
-		}; // c++ is cool, yo
-
-		alignParticle(m_shipClickParticles);
-		alignParticle(m_ufoClickParticles);
-		alignParticle(m_trailingParticles);
-	} // align ship/ufo particles if enabled
-
-
-	void alignStreakToPlayer() {
-		if (!(m_isShip || m_isBird)) return;
-		if (!this->m_regularTrail) return;
-		if ((fancy::settings.customStreak) || (fancy::settings.streakConfigure && fancy::settings.streakAlign)) {
-			this->m_regularTrail->setPosition(this->getPosition());
-		}
-	} // align custom streak if enabled
 
 	
 	void colorDashSprite(CCSprite* d) {
@@ -463,6 +514,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 		} // normal color p1
     } // function to modify particles
 
+
 	void modifyPlayerStreak() {
 		if (!this->m_regularTrail) return;
 		if (fancy::settings.customStreak) return;
@@ -481,6 +533,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 		}
 		this->m_regularTrail->tintWithColor(fancy::settings.p1StreakColor);
 	} // function to modify streak
+
 
 	void modifyPlayerParticles() {
 		modifyParticles(m_playerGroundParticles);

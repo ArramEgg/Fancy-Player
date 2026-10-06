@@ -10,12 +10,12 @@
 using namespace geode::prelude;
 
 // To whoever may be reading this, I apologize in advance. The UI was quite complex, so I built it all manually.
-// FancyPopup::init() ends at line 1,189.
-// Callback functions end at line 1,961.
+// FancyPopup::init() ends at line 1,226.
+// Callback functions end at line 2,017.
 
 class FancyPopup : public Popup {
 protected:
-	int CurrentPage = 1;
+	int CurrentPage = Mod::get()->getSavedValue<int>("menu-page");
 	bool runHue = false;
 	float hue = 0.f;
 	CCLabelBMFont* m_rgbfslbl;
@@ -353,21 +353,27 @@ protected:
 
 		auto streakAlignWaveInfo = CCMenuItemSpriteExtra::create(infoButton, this, menu_selector(FancyPopup::streakAlignWaveInfoCallback));
 		streakAlignWaveInfo->setAnchorPoint({0.5f, 0.5f});
-		streakAlignWaveInfo->setPosition({113.f, 93.f});
+		streakAlignWaveInfo->setPosition({113.f, 100.f});
 		streakAlignWaveInfo->setID("align-streak-wave-info-button");
 		page3Menu->addChild(streakAlignWaveInfo);
 
 		auto scaleRadiusInfo = CCMenuItemSpriteExtra::create(infoButton, this, menu_selector(FancyPopup::scaleRadiusInfoCallback));
 		scaleRadiusInfo->setAnchorPoint({0.5f, 0.5f});
-		scaleRadiusInfo->setPosition({113.f, 65.f});
+		scaleRadiusInfo->setPosition({113.f, 75.f});
 		scaleRadiusInfo->setID("scale-radius-info-button");
 		page3Menu->addChild(scaleRadiusInfo);
 
 		auto customInfoMenuItem = CCMenuItemSpriteExtra::create(infoButton, this, menu_selector(FancyPopup::customInfoCallback));
 		customInfoMenuItem->setAnchorPoint({0.5f, 0.5f});
-		customInfoMenuItem->setPosition({107.f, 35.f});
+		customInfoMenuItem->setPosition({107.f, 50.f});
 		customInfoMenuItem->setID("custom-trail-info-button");
 		page3Menu->addChild(customInfoMenuItem);
+
+		auto bigShipFireInfo = CCMenuItemSpriteExtra::create(infoButton, this, menu_selector(FancyPopup::bigShipFireInfoCallback));
+		bigShipFireInfo->setAnchorPoint({0.5f, 0.5f});
+		bigShipFireInfo->setPosition({100.f, 25.f});
+		bigShipFireInfo->setID("big-ship-fire-info-button");
+		page3Menu->addChild(bigShipFireInfo);
 
 
 		/*----
@@ -624,21 +630,27 @@ protected:
 
 		auto streakAlignWaveLabel = CCLabelBMFont::create("Align Streak\nWhen Wave", "bigFont.fnt");
 		streakAlignWaveLabel->setScale(0.325f);
-		streakAlignWaveLabel->setPosition({111.f, 169.f});
+		streakAlignWaveLabel->setPosition({111.f, 174.f});
 		streakAlignWaveLabel->setID("streak-align-wave-label");
 		page3Layer->addChild(streakAlignWaveLabel);
 
 		auto changeRadiusLabel = CCLabelBMFont::create("Scale Radius\nEmitters", "bigFont.fnt");
 		changeRadiusLabel->setScale(0.325f);
-		changeRadiusLabel->setPosition({111.f, 139.f});
+		changeRadiusLabel->setPosition({111.f, 149.f});
 		changeRadiusLabel->setID("change-radius-label");
 		page3Layer->addChild(changeRadiusLabel);
 
 		auto tctlbl = CCLabelBMFont::create("Enable Nyan\nCat Trail", "bigFont.fnt");
 		tctlbl->setScale(0.325f);
-		tctlbl->setPosition({108.f, 109.f});
+		tctlbl->setPosition({108.f, 124.f});
 		tctlbl->setID("custom-trail-label");
 		page3Layer->addChild(tctlbl);
+
+		auto bsflbl = CCLabelBMFont::create("Enable Big\nShip Fire", "bigFont.fnt");
+		bsflbl->setScale(0.325f);
+		bsflbl->setPosition({105.f, 99.f});
+		bsflbl->setID("big-ship-fire-label");
+		page3Layer->addChild(bsflbl);
 
 		auto name = CCSprite::create("FP_shamelessPlug_001.png"_spr);
 		name->setPosition({255.f, 145.f});
@@ -1020,7 +1032,7 @@ protected:
 
 		auto toggleCustomTrail = CCMenuItemToggler::create(toggleOffSpr, toggleOnSpr, this, menu_selector(FancyPopup::toggleCustomTrailCallback));
 		toggleCustomTrail->setAnchorPoint({0.5f, 0.5f});
-		toggleCustomTrail->setPosition({15.f, 35.f});
+		toggleCustomTrail->setPosition({15.f, 50.f});
 		toggleCustomTrail->setScale(0.6f);
 		toggleCustomTrail->setID("toggle-custom-trail");
 		page3Menu->addChild(toggleCustomTrail);
@@ -1029,7 +1041,7 @@ protected:
 
 		auto toggleStreakAlignWave = CCMenuItemToggler::create(toggleOffSpr, toggleOnSpr, this, menu_selector(FancyPopup::toggleStreakAlignWaveCallback));
 		toggleStreakAlignWave->setAnchorPoint({0.5f, 0.5f});
-		toggleStreakAlignWave->setPosition({15.f, 95.f});
+		toggleStreakAlignWave->setPosition({15.f, 100.f});
 		toggleStreakAlignWave->setScale(0.6f);
 		toggleStreakAlignWave->setID("toggle-streak-align-wave");
 		page3Menu->addChild(toggleStreakAlignWave);
@@ -1038,12 +1050,21 @@ protected:
 
 		auto toggleScaleRadius = CCMenuItemToggler::create(toggleOffSpr, toggleOnSpr, this, menu_selector(FancyPopup::toggleScaleRadiusCallback));
 		toggleScaleRadius->setAnchorPoint({0.5f, 0.5f});
-		toggleScaleRadius->setPosition({15.f, 65.f});
+		toggleScaleRadius->setPosition({15.f, 75.f});
 		toggleScaleRadius->setScale(0.6f);
 		toggleScaleRadius->setID("toggle-scale-radius");
 		page3Menu->addChild(toggleScaleRadius);
 		bool toggleScaleRadiusState = fancy::settings.changeRadius;
 		toggleScaleRadius->toggle(toggleScaleRadiusState ? 1 : 0);
+
+		auto toggleShipFire = CCMenuItemToggler::create(toggleOffSpr, toggleOnSpr, this, menu_selector(FancyPopup::toggleShipFireCallback));
+		toggleShipFire->setAnchorPoint({0.5f, 0.5f});
+		toggleShipFire->setPosition({15.f, 25.f});
+		toggleShipFire->setScale(0.6f);
+		toggleShipFire->setID("toggle-big-ship-fire");
+		page3Menu->addChild(toggleShipFire);
+		bool toggleShipFireState = fancy::settings.bigShipFire;
+		toggleShipFire->toggle(toggleShipFireState ? 1 : 0);
 
 
 		/*-----
@@ -1107,8 +1128,24 @@ protected:
 		----------------------------*/
 
 
-		m_mainLayer->getChildByID("page-2-layer")->setVisible(false);
-		m_mainLayer->getChildByID("page-3-layer")->setVisible(false);
+		if (fancy::settings.menuPage == 1) {
+			CurrentPage = 1;
+			m_mainLayer->getChildByID("page-2-layer")->setVisible(false);
+			m_mainLayer->getChildByID("page-3-layer")->setVisible(false);
+			pageNumber->setString("1/3");
+		} 
+		else if (fancy::settings.menuPage == 2) {
+			CurrentPage = 2;
+			m_mainLayer->getChildByID("page-1-layer")->setVisible(false);
+			m_mainLayer->getChildByID("page-3-layer")->setVisible(false);
+			pageNumber->setString("2/3");
+		} 
+		else if (fancy::settings.menuPage == 3)  {
+			CurrentPage = 3;
+			m_mainLayer->getChildByID("page-1-layer")->setVisible(false);
+			m_mainLayer->getChildByID("page-2-layer")->setVisible(false);
+			pageNumber->setString("3/3");
+		}
 
 		if (!fancy::settings.p2Enable) {
 			m_togglesP2Page1->setEnabled(false);
@@ -1326,7 +1363,7 @@ protected:
 	void scaleRadiusInfoCallback(CCObject* sender) {
 		createQuickPopup(
 			"Info",
-			"When enabled, the radius setting of emitter-type player particles will be scaled based on the player's size.\n<cy>The default particles are of the gravity-type, so unless you have custom particles, you'll never use this.</c>\nDon't use if you have 'Classic Particles' enabled.",
+			"When enabled, the radius setting of radius-type player particles will be scaled based on the player's size.\n<cy>The default particles are of the gravity-type, so unless you have custom particles, you'll never use this.</c>\nDon't use if you have 'Classic Particles' enabled.",
 			"OK",
 			nullptr,
 			330.f,
@@ -1343,6 +1380,19 @@ protected:
 			"OK",
 			nullptr,
 			320.f,
+			nullptr,
+			true,
+			true
+		);
+	}
+
+	void bigShipFireInfoCallback(CCObject* sender) {
+		createQuickPopup(
+			"Info",
+			"This will make the ship fire bigger.",
+			"OK",
+			nullptr,
+			270.f,
 			nullptr,
 			true,
 			true
@@ -1679,6 +1729,12 @@ protected:
 		auto toggle = static_cast<CCMenuItemToggler*>(sender);
 		bool state = !toggle->isToggled();
 		Mod::get()->setSavedValue("custom-streak", state);
+	}
+
+	void toggleShipFireCallback(CCObject* sender) {
+		auto toggle = static_cast<CCMenuItemToggler*>(sender);
+		bool state = !toggle->isToggled();
+		Mod::get()->setSavedValue("big-ship-fire", state);
 	}
 
 	// streak config
@@ -2095,6 +2151,7 @@ protected:
 	}
 
 	void updateSettings() {
+		fancy::settings.menuPage = Mod::get()->getSavedValue<int>("menu-page");
 		/*---------------
 		player 1 settings
 		---------------*/
@@ -2159,6 +2216,7 @@ protected:
 		fancy::settings.changeRadius = Mod::get()->getSavedValue<bool>("change-radius");
 		fancy::settings.alignParticles = Mod::get()->getSavedValue<bool>("align-particles");
 		fancy::settings.customStreak = Mod::get()->getSavedValue<bool>("custom-streak");
+		fancy::settings.bigShipFire = Mod::get()->getSavedValue<bool>("big-ship-fire");
 		/*-------------
 		streak settings
 		-------------*/
@@ -2176,6 +2234,7 @@ protected:
 	}
 
 	void onClose(CCObject* sender) {
+		Mod::get()->setSavedValue<int>("menu-page", CurrentPage);
 		Popup::onClose(sender);
 		updateSettings();
 	}

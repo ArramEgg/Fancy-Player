@@ -1,3 +1,8 @@
+# 1.3.2
+- Added "big ship fire" option for fun
+- Fixed Mega Hack's Frame Extrapolation breaking alignment options
+- Made menu pagenumber save with session to make fine-tuning less annoying
+
 # 1.3.1
 - Added color to the mod's description text (wooowwww)
 - Changed some default settings (default colors are still mine loool)

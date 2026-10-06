@@ -4,6 +4,7 @@ namespace fancy
 {
 	struct Settings
 	{
+		int menuPage = Mod::get()->getSavedValue<int>("menu-page", 1);
 		// p1 settings
 		bool p1ChangeParticles = Mod::get()->getSavedValue<bool>("p1-change-particles", false);
 		bool p1RainbowParticles = Mod::get()->getSavedValue<bool>("p1-rainbow-particles", false);;
@@ -63,6 +64,7 @@ namespace fancy
 		bool alignParticles = Mod::get()->getSavedValue<bool>("align-particles", false);
 		bool customStreak = Mod::get()->getSavedValue<bool>("custom-streak", false);
 		bool streakAlignWave = Mod::get()->getSavedValue<bool>("streak-align-wave", false);
+		bool bigShipFire = Mod::get()->getSavedValue<bool>("big-ship-fire", false);
 		// streak settings
 		bool streakConfigure = Mod::get()->getSavedValue<bool>("streak-configure", false);
 		bool streakFadeEnable = Mod::get()->getSavedValue<bool>("streak-fade-enable", false);

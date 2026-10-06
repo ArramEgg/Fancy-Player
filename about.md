@@ -2,8 +2,6 @@
 
 This mod allows you to color and configure the decorative player effects, overriding the game's default colors and configuration. Everything is inside the mod settings.
 
-Suggestion: I match the colors with my glow color
-
 ## <cr>Main Features</c>
 
 - Override startColor and finishColor of player particles
@@ -25,6 +23,7 @@ Suggestion: I match the colors with my glow color
 - Option to align particles vertically to player when airborne
 - Option to align streak to player when airborne
     - Option to better align streak to wave
+- Option to make the ship fires bigger
 - Button in garage for easy access to mod settings
 - Button in pause menu for even easier access to mod settings
 - Mod Menu themes under Geode mod settings
