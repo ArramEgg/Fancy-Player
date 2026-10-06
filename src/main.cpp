@@ -55,15 +55,6 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 }; // add button to garage
 
 
-class $modify(FPMenuLayer, MenuLayer) {
-	void onQuit(CCObject* sender) {
-		Mod::get()->setSavedValue<int>("menu-page", 1);
-		fancy::settings.menuPage = Mod::get()->getSavedValue<int>("menu-page");
-		MenuLayer::onQuit(sender);
-	}
-}; // emulating "sessions" in a very lazy way
-
-
 class $modify(FPPauseLayer, PauseLayer) {
 	void customSetup() {
 		PauseLayer::customSetup();
@@ -597,3 +588,9 @@ class $modify(FPPlayerObject, PlayerObject) {
 		return Cube;
 	} // used for optimized particle color changing
 }; // modify PlayerObject
+
+
+$on_game(Loaded) {
+	Mod::get()->setSavedValue<int>("menu-page", 1);
+	fancy::settings.menuPage = Mod::get()->getSavedValue<int>("menu-page");
+} // session emulation

@@ -1,4 +1,4 @@
-# 1.3.2
+# 1.3.3
 - Added "big ship fire" option for fun
 - Fixed Mega Hack's Frame Extrapolation breaking alignment options
 - Made menu pagenumber save with session to make fine-tuning less annoying
