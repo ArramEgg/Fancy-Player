@@ -10,8 +10,8 @@
 using namespace geode::prelude;
 
 // To whoever may be reading this, I apologize in advance. The UI was quite complex, so I built it all manually.
-// FancyPopup::init() ends at line 1,226.
-// Callback functions end at line 2,017.
+// FancyPopup::init() ends at line 1,232.
+// Callback functions end at line 2,023.
 
 class FancyPopup : public Popup {
 protected:
@@ -1128,24 +1128,30 @@ protected:
 		----------------------------*/
 
 
-		if (fancy::settings.menuPage == 1) {
-			CurrentPage = 1;
-			m_mainLayer->getChildByID("page-2-layer")->setVisible(false);
-			m_mainLayer->getChildByID("page-3-layer")->setVisible(false);
-			pageNumber->setString("1/3");
+		switch (CurrentPage)
+		{
+			case 1:
+				m_mainLayer->getChildByID("page-2-layer")->setVisible(false);
+				m_mainLayer->getChildByID("page-3-layer")->setVisible(false);
+				pageNumber->setString("1/3");
+				break;
+			case 2:
+				m_mainLayer->getChildByID("page-1-layer")->setVisible(false);
+				m_mainLayer->getChildByID("page-3-layer")->setVisible(false);
+				pageNumber->setString("2/3");
+				break;
+			case 3:
+				m_mainLayer->getChildByID("page-1-layer")->setVisible(false);
+				m_mainLayer->getChildByID("page-2-layer")->setVisible(false);
+				pageNumber->setString("3/3");
+				break;
+			default:
+				CurrentPage = 1;
+				m_mainLayer->getChildByID("page-2-layer")->setVisible(false);
+				m_mainLayer->getChildByID("page-3-layer")->setVisible(false);
+				pageNumber->setString("1/3");
+				break;
 		} 
-		else if (fancy::settings.menuPage == 2) {
-			CurrentPage = 2;
-			m_mainLayer->getChildByID("page-1-layer")->setVisible(false);
-			m_mainLayer->getChildByID("page-3-layer")->setVisible(false);
-			pageNumber->setString("2/3");
-		} 
-		else if (fancy::settings.menuPage == 3)  {
-			CurrentPage = 3;
-			m_mainLayer->getChildByID("page-1-layer")->setVisible(false);
-			m_mainLayer->getChildByID("page-2-layer")->setVisible(false);
-			pageNumber->setString("3/3");
-		}
 
 		if (!fancy::settings.p2Enable) {
 			m_togglesP2Page1->setEnabled(false);
@@ -2151,7 +2157,7 @@ protected:
 	}
 
 	void updateSettings() {
-		fancy::settings.menuPage = Mod::get()->getSavedValue<int>("menu-page");
+		Mod::get()->setSavedValue<int>("menu-page", CurrentPage);
 		/*---------------
 		player 1 settings
 		---------------*/
@@ -2234,7 +2240,6 @@ protected:
 	}
 
 	void onClose(CCObject* sender) {
-		Mod::get()->setSavedValue<int>("menu-page", CurrentPage);
 		Popup::onClose(sender);
 		updateSettings();
 	}

@@ -592,5 +592,4 @@ class $modify(FPPlayerObject, PlayerObject) {
 
 $on_game(Loaded) {
 	Mod::get()->setSavedValue<int>("menu-page", 1);
-	fancy::settings.menuPage = Mod::get()->getSavedValue<int>("menu-page");
-} // session emulation
+} // "UNACCEPTABLEEEEEE" - Lemongrab

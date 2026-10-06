@@ -4,7 +4,6 @@ namespace fancy
 {
 	struct Settings
 	{
-		int menuPage = Mod::get()->getSavedValue<int>("menu-page", 1);
 		// p1 settings
 		bool p1ChangeParticles = Mod::get()->getSavedValue<bool>("p1-change-particles", false);
 		bool p1RainbowParticles = Mod::get()->getSavedValue<bool>("p1-rainbow-particles", false);;
