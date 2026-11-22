@@ -1,5 +1,10 @@
+# 1.3.5
+- Port to Geode v6
+- Fixed and cleaned garbage old code
+- Big update soon!
+
 # 1.3.4
-- Added "big ship fire" option for fun
+- Added "big ship fire" option
 - Fixed Mega Hack's Frame Extrapolation breaking alignment options
 - Made menu pagenumber save with session to make fine-tuning less annoying
 

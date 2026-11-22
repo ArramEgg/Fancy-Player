@@ -16,21 +16,10 @@ namespace fancy
 	Settings settings;
 } // mod settings
 
-enum PlayerMode {
-    Cube,
-    Ship,
-    Bird,
-    Dart,
-    Robot,
-    Spider,
-    Swing
-}; // enums for custom utility function getCurrentMode() in $modify(PlayerObject)
-
 class $modify(FPGarageLayer, GJGarageLayer) {
 	bool init() {
 		if (!GJGarageLayer::init()) return false;
 
-		// create the things
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
 		auto menu = CCMenu::create();
 		menu->setContentSize({50.f, 50.f});
@@ -43,7 +32,6 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 		menu->setID("fancy-menu");
 		btn->setID("fancy-button");
 
-		// add the things
 		menu->addChild(btn);
 		menu->updateLayout();
 		this->addChild(menu);
@@ -52,22 +40,20 @@ class $modify(FPGarageLayer, GJGarageLayer) {
 	void onLogoBtn(CCObject *) {
 		FancyPopup::create()->show();
 	}
-}; // add button to garage
+};
 
 
 class $modify(FPPauseLayer, PauseLayer) {
 	void customSetup() {
 		PauseLayer::customSetup();
 		
-		// create button
 		auto spr = CCSprite::create("FP_logoBtn_001.png"_spr);
-		spr->setScale(0.65f);
+		spr->setScale(0.575f);
 		auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(FPPauseLayer::onLogoBtn));
 		btn->setAnchorPoint({0.5f, 0.5f});
 		btn->setID("fancy-button");
 		
-		// add button
-		if (auto menu = this->getChildByID("right-button-menu")) {
+		if (auto menu = this->getChildByIDRecursive("right-button-menu")) {
 			menu->addChild(btn);
 			menu->updateLayout();
 		}
@@ -75,7 +61,7 @@ class $modify(FPPauseLayer, PauseLayer) {
 	void onLogoBtn(CCObject *) {
 		FancyPopup::create()->show();
 	}
-}; // add button to pause menu
+};
 
 
 class $modify(FPGJBaseGameLayer, GJBaseGameLayer) {
@@ -133,14 +119,10 @@ class $modify(FPPlayerObject, PlayerObject) {
 
 	
 	struct Fields {
-		bool lastUpsideDown = false;
-		PlayerMode lastMode = Cube;
 		std::unordered_map<CCParticleSystemQuad*, float> baseRadius;
 		float hue = 0.f;
-		float lastHue = 0.f;
-		bool lastOnGround = false;
 		bool runHue = false;
-	}; // fields for comparing changes
+	};
 
 
 	/* -------------
@@ -169,39 +151,15 @@ class $modify(FPPlayerObject, PlayerObject) {
 	}
 
 
-	void hitGround(GameObject* object, bool notFlipped) {
-		PlayerObject::hitGround(object, notFlipped);
-		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
-		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
-		if (!changeParticles) return;
-		modifyPlayerParticles();
-	} // dumb
-
-
-	bool init(int player, int ship, GJBaseGameLayer * gameLayer, cocos2d::CCLayer * layer, bool playLayer) {
-		if (!PlayerObject::init(player, ship, gameLayer, layer, playLayer)) return false;
-
-		// no need to update fields without particles
-		if (!fancy::settings.p1ChangeParticles && !fancy::settings.p2ChangeParticles) return true;
-
-		// get fields ready for comparison
-		m_fields->lastUpsideDown = m_isUpsideDown;
-		m_fields->lastMode = getCurrentMode();
-		m_fields->lastOnGround = m_isOnGround2;
-		return true;
-	}
-
-
-	void loadFromCheckpoint(PlayerCheckpoint* object) {
-		PlayerObject::loadFromCheckpoint(object);
-		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
-		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
-		if (!changeParticles) return;
-		modifyPlayerParticles();
-	}
-
-
 	void playSpiderDashEffect(CCPoint from, CCPoint to) {
+		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
+		bool changeSpiderDash = p2 ? fancy::settings.p2ChangeSpiderDash : fancy::settings.p1ChangeSpiderDash;
+		
+		if (!changeSpiderDash) {
+			PlayerObject::playSpiderDashEffect(from, to);
+			return;
+		}
+		
 		int before = GJBaseGameLayer::get()->m_objectLayer->getChildrenCount();
 		PlayerObject::playSpiderDashEffect(from, to);
 		int after = GJBaseGameLayer::get()->m_objectLayer->getChildrenCount();
@@ -215,21 +173,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 				colorSpiderDashCircle(circle);
 			}
 		}
-	} // call when doing the cool spider thing
-
-
-	void resetObject() {
-		PlayerObject::resetObject();
-
-		// player 2 check
-		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
-		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
-		if (!changeParticles) return;
-		
-		// epic hack doubles as a mega hack reset fix + UFO reset bug fix (forces update next tick)
-		m_fields->lastMode = static_cast<PlayerMode>((getCurrentMode() + 1) % 7);
-		modifyPlayerParticles();
-	} // call on player reset
+	}
 
 
 	void resetStreak() {
@@ -273,6 +217,15 @@ class $modify(FPPlayerObject, PlayerObject) {
 			this->m_alwaysShowStreak = true;
 		} // nyan nyan nyan nynan aaaaaaaaaaa AAAAAAAAAAAAAAA
 	}
+	
+	
+	void toggleBirdMode(bool enable, bool noEffects) {
+		PlayerObject::toggleBirdMode(enable, noEffects);
+		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
+		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
+		if (!changeParticles) return;
+		modifyPlayerParticles();
+	}
 
 
 	void toggleDartMode(bool enable, bool noEffects) {
@@ -298,6 +251,9 @@ class $modify(FPPlayerObject, PlayerObject) {
 
 	void toggleFlyMode(bool enable, bool noEffects) {
 		PlayerObject::toggleFlyMode(enable, noEffects);
+		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
+		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
+		if (!changeParticles || !fancy::settings.bigShipFire) return;
 		if (fancy::settings.bigShipFire) {
 			if (this->m_shipStreak) {
 				this->m_shipStreak->setM_fMaxSeg(40.f);
@@ -306,7 +262,9 @@ class $modify(FPPlayerObject, PlayerObject) {
 				this->m_shipStreak->m_fMinSeg = 20.f;
 			}
 		}
-	} // ngl writing all these comments is getting old
+		if (!changeParticles) return;
+		modifyPlayerParticles();
+	}
 
 
 	void togglePlayerScale(bool enable, bool noEffects) {
@@ -343,14 +301,24 @@ class $modify(FPPlayerObject, PlayerObject) {
         PlayerObject::update(dt);
 
 		// update hue or nah?
-		m_fields->runHue = fancy::settings.p1RainbowParticles || fancy::settings.p1RainbowDashFire || fancy::settings.p1RainbowSpiderDash || fancy::settings.p1RainbowStreak || (fancy::settings.p2Enable && (fancy::settings.p2RainbowParticles || fancy::settings.p2RainbowDashFire || fancy::settings.p2RainbowSpiderDash || fancy::settings.p2RainbowStreak));
+		m_fields->runHue = 
+			fancy::settings.p1RainbowParticles ||
+			fancy::settings.p1RainbowDashFire ||
+			fancy::settings.p1RainbowSpiderDash ||
+			fancy::settings.p1RainbowStreak ||
+			(fancy::settings.p2Enable && (
+				fancy::settings.p2RainbowParticles ||
+				fancy::settings.p2RainbowDashFire ||
+				fancy::settings.p2RainbowSpiderDash ||
+				fancy::settings.p2RainbowStreak
+				)
+			);
 
 		if (m_fields->runHue) {
 			m_fields->hue += dt * (fancy::settings.rgbSpeed * 0.05f);
 			if (m_fields->hue > 1.f) m_fields->hue -= 1.f;
 		} // update hue for rainbow effects
 
-		// player 2 check
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
 		// update effects if player 1 or 2 is enabled (player 2 check is done in each effect's respective function)
 		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
@@ -358,48 +326,32 @@ class $modify(FPPlayerObject, PlayerObject) {
 		bool rainbowDashFire = p2 ? fancy::settings.p2RainbowDashFire : fancy::settings.p1RainbowDashFire;
 		bool changeStreak = fancy::settings.p1ChangeStreak || (fancy::settings.p2Enable && fancy::settings.p2ChangeStreak);
 
-		if (changeParticles) {
-			if (rainbowParticles) {
-				modifyPlayerParticles();
-			} // color particles per frame if rainbow fade is on
-			else {
-				PlayerMode mode = getCurrentMode();
-				if (m_isUpsideDown != m_fields->lastUpsideDown || mode != m_fields->lastMode || m_isOnGround2 != m_fields->lastOnGround) {
-					// update fields when changes occur
-					m_fields->lastUpsideDown = m_isUpsideDown;
-					m_fields->lastMode = mode;
-					m_fields->lastOnGround = m_isOnGround2;
-					// color particles after changes
-					if (changeParticles) {
-						modifyPlayerParticles();
-					}
-				} // check for player changes
-			} // otherwise only color on changes
-		} // change particles if enabled
+		if (changeParticles && rainbowParticles) {
+			modifyPlayerParticles();
+		}
 
-		if (fancy::settings.customStreak) {
-			this->m_regularTrail->tintWithColor({255, 255, 255});
-		} // bruh
-		
-		if (rainbowDashFire) {
-			if (m_fields->lastHue != m_fields->hue) {
-				updateDashColor();
-			} // avoid double update just in case
-		} // rainbow dash fire
-
-		if (changeStreak) {
+		if (changeStreak || fancy::settings.customStreak) {
 			modifyPlayerStreak();
-		} // yeah
+		} // bruh
     }
 
 
 	void updateDashAnimation() {
 		PlayerObject::updateDashAnimation();
-		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
+		bool p2 = m_isSecondPlayer;
 		bool changeDashFire = p2 ? fancy::settings.p2ChangeDashFire : fancy::settings.p1ChangeDashFire;
 		if (!changeDashFire) return;
-		updateDashColor();
+		if (!m_dashFireSprite) return;
+		colorDashSprite(m_dashFireSprite);
 	} // color dash fire
+
+
+	void updateStreakBlend(bool blend) {	
+		PlayerObject::updateStreakBlend(blend);
+		if ((fancy::settings.streakBlend && fancy::settings.streakConfigure) || fancy::settings.customStreak) {
+			this->m_regularTrail->setBlendFunc({GL_ONE, GL_ONE_MINUS_SRC_ALPHA});
+		}
+	}
 
 
 	void updateTimeMod(float speed, bool noEffects) {
@@ -413,14 +365,6 @@ class $modify(FPPlayerObject, PlayerObject) {
 			}
 		}
 	} // go listen to my music
-
-
-	void updateStreakBlend(bool blend) {	
-		PlayerObject::updateStreakBlend(blend);
-		if ((fancy::settings.streakBlend && fancy::settings.streakConfigure) || fancy::settings.customStreak) {
-			this->m_regularTrail->setBlendFunc({GL_ONE, GL_ONE_MINUS_SRC_ALPHA});
-		}
-	} // disable additive blending if enabled
 
 
 	/*-------------------------
@@ -442,7 +386,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 			return;
 		}
 		d->setColor(fancy::settings.p1DashFireColor);
-	} // function for coloring dash fire sprite
+	}
 
 
 	void colorSpiderDashCircle(CCCircleWave* c) {
@@ -462,7 +406,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 			return;
 		}
 		c->m_color = fancy::settings.p1SpiderDashColor;
-	} // function for coloring spider dash circles
+	}
 
 
 	void colorSpiderDashSprite(CCSprite* s) {
@@ -479,12 +423,10 @@ class $modify(FPPlayerObject, PlayerObject) {
 			return;
 		}
 		s->setColor(fancy::settings.p1SpiderDashColor);
-	} // function for coloring spider dash sprite
-
+	}
 
     void modifyParticles(CCParticleSystemQuad* p) {
         if (!p) return;
-		// player 2 check
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
 		bool rainbowParticles = p2 ? fancy::settings.p2RainbowParticles : fancy::settings.p1RainbowParticles;
 		if (rainbowParticles) {
@@ -494,21 +436,24 @@ class $modify(FPPlayerObject, PlayerObject) {
 			cocos2d::ccColor4F endColor = FancyPlayer::HSVtoRGB(m_fields->hue, 1.f, 1.f, finishAlpha);
 			p->setStartColor(startColor);
 			p->setEndColor(endColor);
-		} // rainbow color
+		}
 		else if (p2) {
 			p->setStartColor(fancy::settings.p2StartColorF);
 			p->setEndColor(fancy::settings.p2FinishColorF);
-		} // normal color p2
+		}
 		else {
 			p->setStartColor(fancy::settings.p1StartColorF);
 			p->setEndColor(fancy::settings.p1FinishColorF);
-		} // normal color p1
-    } // function to modify particles
+		}
+    }
 
 
 	void modifyPlayerStreak() {
 		if (!this->m_regularTrail) return;
-		if (fancy::settings.customStreak) return;
+		if (fancy::settings.customStreak) {
+			this->m_regularTrail->tintWithColor({255, 255, 255});
+			return;
+		}
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
 		ccColor3B streakColor = p2 ? fancy::settings.p2StreakColor : fancy::settings.p1StreakColor;
 		bool rainbowStreak = p2 ? fancy::settings.p2RainbowStreak : fancy::settings.p1RainbowStreak;
@@ -517,13 +462,14 @@ class $modify(FPPlayerObject, PlayerObject) {
 			this->m_regularTrail->tintWithColor(FancyPlayer::color4Fto3B(color));
 			return;
 		}
-		if (m_regularTrail->getColor() == streakColor) return;
 		if (p2 && fancy::settings.p2ChangeStreak) {
+			if (m_regularTrail->getColor() == streakColor) return;
 			this->m_regularTrail->tintWithColor(fancy::settings.p2StreakColor);
 			return;
 		}
+		if (m_regularTrail->getColor() == streakColor) return;
 		this->m_regularTrail->tintWithColor(fancy::settings.p1StreakColor);
-	} // function to modify streak
+	}
 
 
 	void modifyPlayerParticles() {
@@ -538,7 +484,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 		modifyParticles(m_swingBurstParticles2);
 		modifyParticles(m_landParticles0);
 		modifyParticles(m_landParticles1);
-	} // select which particle systems to modify
+	}
 
 
 	void modifyParticleRadius() {
@@ -553,10 +499,10 @@ class $modify(FPPlayerObject, PlayerObject) {
 		modifyRadius(m_swingBurstParticles2);
 		modifyRadius(m_landParticles0);
 		modifyRadius(m_landParticles1);
-	} // select which particle systems to modify radius of
+	}
 
 
-	void modifyRadius(CCParticleSystemQuad* p) { // probably a good idea to make this check if the emitter type is radius
+	void modifyRadius(CCParticleSystemQuad* p) {
 		if (!fancy::settings.changeRadius) return;
 		if (!p) return;
 		if (!m_fields->baseRadius.contains(p)) {
@@ -564,32 +510,10 @@ class $modify(FPPlayerObject, PlayerObject) {
 		} // radius scale
 		float base = m_fields->baseRadius[p];
 		p->setStartRadius(base * m_vehicleSize);
-	} // function to modify emiiter type 1 radius
-
-
-	void updateDashColor() {
-		if (!m_dashFireSprite) return;
-		colorDashSprite(m_dashFireSprite);
-		m_fields->lastHue = m_fields->hue;
-	} // color dash fire sprite
-
-	
-	/*---------------------------------
-	Section 3: Custom Utility Functions
-	---------------------------------*/
-	
-	PlayerMode getCurrentMode() {
-		if (m_isShip) return Ship;
-		if (m_isBird) return Bird;
-		if (m_isDart) return Dart;
-		if (m_isRobot) return Robot;
-		if (m_isSpider) return Spider;
-		if (m_isSwing) return Swing;
-		return Cube;
-	} // used for optimized particle color changing
+	}
 }; // modify PlayerObject
 
 
 $on_game(Loaded) {
 	Mod::get()->setSavedValue<int>("menu-page", 1);
-} // "UNACCEPTABLEEEEEE" - Lemongrab
+}
