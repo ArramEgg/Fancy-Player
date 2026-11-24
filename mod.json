@@ -1,5 +1,5 @@
 {
-	"geode": "6.0.0-beta.1",
+	"geode": "6.0.0",
 	"gd": {
 		"win": "2.2091",
 		"android": "2.2091",
@@ -8,7 +8,7 @@
 	},
 	"id": "arram.fancy-player",
 	"name": "Fancy Player",
-	"version": "v1.3.5",
+	"version": "v1.3.6",
 	"developer": "Arram",
 	"description": "Now you can be extra",
 	"links": {
@@ -21,7 +21,7 @@
 		"offline"
 	],
 	"dependencies": {
-		"geode.node-ids": ">=v1.22.0"
+		"geode.node-ids": ">=v1.24.0-beta.1"
 	},
 	"settings": {
 		"mod-theme": {

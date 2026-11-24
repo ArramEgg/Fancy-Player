@@ -1,3 +1,8 @@
+# 1.3.6
+- Further optimization
+- Yet another Mega Hack fix
+- Big update still soon...
+
 # 1.3.5
 - Port to Geode v6
 - Fixed and cleaned garbage old code

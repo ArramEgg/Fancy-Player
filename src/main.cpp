@@ -122,7 +122,10 @@ class $modify(FPPlayerObject, PlayerObject) {
 		std::unordered_map<CCParticleSystemQuad*, float> baseRadius;
 		float hue = 0.f;
 		bool runHue = false;
+		bool isMegaHackExistingAndThrowingOptimizationOutTheWindow6767;
 	};
+	// okay, explanation: 
+	// the start colors of m_trailingParticles and m_ufoClickParticles are mysteriously very difficult to change even with all respective mega hack settings disabled
 
 
 	/* -------------
@@ -149,7 +152,16 @@ class $modify(FPPlayerObject, PlayerObject) {
 			}
 		}
 	}
-
+	
+	
+	bool init(int player, int ship, GJBaseGameLayer * gameLayer, cocos2d::CCLayer * layer, bool playLayer) {
+		if (!PlayerObject::init(player, ship, gameLayer, layer, playLayer)) return false;
+		if (Loader::get()->isModLoaded("absolllute.megahack")) {
+			m_fields->isMegaHackExistingAndThrowingOptimizationOutTheWindow6767 = true;
+		}
+		return true;
+	}
+	
 
 	void playSpiderDashEffect(CCPoint from, CCPoint to) {
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
@@ -174,7 +186,19 @@ class $modify(FPPlayerObject, PlayerObject) {
 			}
 		}
 	}
-
+	
+	
+	void resetObject() {
+		PlayerObject::resetObject();
+		modifyParticles(m_playerGroundParticles);
+		modifyParticles(m_trailingParticles);
+		modifyParticles(m_vehicleGroundParticles);
+		modifyParticles(m_robotBurstParticles);
+		modifyParticles(m_dashParticles);
+		modifyParticles(m_landParticles0);
+		modifyParticles(m_landParticles1);
+	}
+	
 
 	void resetStreak() {
 		PlayerObject::resetStreak();
@@ -219,15 +243,25 @@ class $modify(FPPlayerObject, PlayerObject) {
 	}
 	
 	
+	void startDashing(DashRingObject* object) {
+		PlayerObject::startDashing(object);
+		if (m_fields->isMegaHackExistingAndThrowingOptimizationOutTheWindow6767) {
+			modifyParticles(m_dashParticles);
+		}
+	}
+	
+	
 	void toggleBirdMode(bool enable, bool noEffects) {
 		PlayerObject::toggleBirdMode(enable, noEffects);
+		if (m_fields->isMegaHackExistingAndThrowingOptimizationOutTheWindow6767) return;
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
 		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
 		if (!changeParticles) return;
-		modifyPlayerParticles();
+		modifyParticles(m_trailingParticles);
+		modifyParticles(m_ufoClickParticles);
 	}
-
-
+	
+	
 	void toggleDartMode(bool enable, bool noEffects) {
 		PlayerObject::toggleDartMode(enable, noEffects);
 		if (fancy::settings.streakConfigure && fancy::settings.streakStrokeEnable && !fancy::settings.customStreak) {
@@ -248,12 +282,9 @@ class $modify(FPPlayerObject, PlayerObject) {
 		}
 	}
 
-
+	
 	void toggleFlyMode(bool enable, bool noEffects) {
 		PlayerObject::toggleFlyMode(enable, noEffects);
-		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
-		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
-		if (!changeParticles || !fancy::settings.bigShipFire) return;
 		if (fancy::settings.bigShipFire) {
 			if (this->m_shipStreak) {
 				this->m_shipStreak->setM_fMaxSeg(40.f);
@@ -262,11 +293,23 @@ class $modify(FPPlayerObject, PlayerObject) {
 				this->m_shipStreak->m_fMinSeg = 20.f;
 			}
 		}
+		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
+		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
 		if (!changeParticles) return;
-		modifyPlayerParticles();
+		modifyParticles(m_trailingParticles);
+		modifyParticles(m_shipClickParticles);
 	}
-
-
+	
+	
+	void toggleSwingMode(bool enable, bool noEffects) {
+		PlayerObject::toggleSwingMode(enable, noEffects);
+		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
+		bool changeParticles = p2 ? fancy::settings.p2ChangeParticles : fancy::settings.p1ChangeParticles;
+		if (!changeParticles) return;
+		modifyParticles(m_swingBurstParticles1);
+		modifyParticles(m_swingBurstParticles2);
+	}
+	
 	void togglePlayerScale(bool enable, bool noEffects) {
 		PlayerObject::togglePlayerScale(enable, noEffects);
 		modifyParticleRadius();
@@ -300,6 +343,18 @@ class $modify(FPPlayerObject, PlayerObject) {
     void update(float dt) {
         PlayerObject::update(dt);
 
+		if (m_fields->isMegaHackExistingAndThrowingOptimizationOutTheWindow6767) {
+			modifyParticles(m_trailingParticles);
+			modifyParticles(m_playerGroundParticles);
+			modifyParticles(m_vehicleGroundParticles);
+			modifyParticles(m_landParticles0);
+			modifyParticles(m_landParticles1);
+			if (m_isBird) {
+				modifyParticles(m_ufoClickParticles);
+			}
+		} // so done with this
+
+		
 		// update hue or nah?
 		m_fields->runHue = 
 			fancy::settings.p1RainbowParticles ||
@@ -370,7 +425,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 	/*-------------------------
 	Section 2: Custom functions
 	-------------------------*/
-
+	
 	
 	void colorDashSprite(CCSprite* d) {
 		if (!d) return;
@@ -425,6 +480,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 		s->setColor(fancy::settings.p1SpiderDashColor);
 	}
 
+
     void modifyParticles(CCParticleSystemQuad* p) {
         if (!p) return;
 		bool p2 = m_isSecondPlayer && fancy::settings.p2Enable;
@@ -446,8 +502,8 @@ class $modify(FPPlayerObject, PlayerObject) {
 			p->setEndColor(fancy::settings.p1FinishColorF);
 		}
     }
-
-
+	
+	
 	void modifyPlayerStreak() {
 		if (!this->m_regularTrail) return;
 		if (fancy::settings.customStreak) {
@@ -488,6 +544,7 @@ class $modify(FPPlayerObject, PlayerObject) {
 
 
 	void modifyParticleRadius() {
+		if (!fancy::settings.changeRadius) return;
 		modifyRadius(m_playerGroundParticles);
 		modifyRadius(m_trailingParticles);
 		modifyRadius(m_shipClickParticles);
@@ -503,7 +560,6 @@ class $modify(FPPlayerObject, PlayerObject) {
 
 
 	void modifyRadius(CCParticleSystemQuad* p) {
-		if (!fancy::settings.changeRadius) return;
 		if (!p) return;
 		if (!m_fields->baseRadius.contains(p)) {
 			m_fields->baseRadius[p] = p->getStartRadius();
